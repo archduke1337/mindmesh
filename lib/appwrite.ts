@@ -40,7 +40,10 @@ export const authService = {
   // Login
   async login(email: string, password: string) {
     try {
-      return await account.createEmailPasswordSession(email, password);
+      return await account.createEmailPasswordSession({
+        email,
+        password
+      });
     } catch (error) {
       throw error;
     }
