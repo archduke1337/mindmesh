@@ -14,7 +14,8 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { eventService, Event } from "@/lib/database";
 import { getErrorMessage } from "@/lib/errorHandler";
-import { PlusIcon, Pencil, Trash2, Image as ImageIcon, CalendarIcon, MapPinIcon, UsersIcon, DollarSignIcon, TagIcon, StarIcon, CrownIcon, TrendingUpIcon, LinkIcon } from "lucide-react";
+import AdminPageWrapper from "@/components/AdminPageWrapper";
+import { PlusIcon, Pencil, Trash2, Image as ImageIcon, CalendarIcon, MapPinIcon, UsersIcon, DollarSignIcon, TagIcon, StarIcon, CrownIcon, TrendingUpIcon, LinkIcon, AlertCircle } from "lucide-react";
 
 export default function AdminEventsPage() {
   const { user, loading } = useAuth();
@@ -25,6 +26,7 @@ export default function AdminEventsPage() {
   const [loadingEvents, setLoadingEvents] = useState(true);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Form state
   const [formData, setFormData] = useState<Partial<Event>>({
@@ -51,18 +53,21 @@ export default function AdminEventsPage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.push("/login");
+    if (!loading && user) {
+      loadEvents();
     }
-    loadEvents();
-  }, [user, loading, router]);
+  }, [user, loading]);
 
   const loadEvents = async () => {
     try {
+      setError(null);
+      setLoadingEvents(true);
       const allEvents = await eventService.getAllEvents();
       setEvents(allEvents);
-    } catch (error) {
-      console.error("Error loading events:", error);
+    } catch (err) {
+      const errorMsg = getErrorMessage(err);
+      console.error("Error loading events:", errorMsg);
+      setError(`Failed to load events: ${errorMsg}`);
     } finally {
       setLoadingEvents(false);
     }
@@ -185,48 +190,57 @@ export default function AdminEventsPage() {
     onClose();
   };
 
-  if (loading || loadingEvents) {
+  if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
-      </div>
+      <AdminPageWrapper title="Event Management" description="Loading...">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+        </div>
+      </AdminPageWrapper>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto py-6 md:py-8 px-4 md:px-6">
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 md:mb-8">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            Event Management
-          </h1>
-          <p className="text-default-500 mt-1 md:mt-2 text-sm md:text-base">
-            Manage all events from here
-          </p>
-        </div>
-        <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
-          <Button 
-            color="danger" 
-            variant="flat" 
-            onPress={handleDeletePastEvents}
-            className="w-full sm:w-auto"
-            size="sm"
-          >
-            <Trash2 className="w-4 h-4" />
-            <span className="hidden sm:inline ml-2">Delete Past Events</span>
-            <span className="sm:hidden ml-2">Delete Past</span>
-          </Button>
-          <Button 
-            color="primary" 
-            onPress={onOpen}
-            className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-pink-600"
-            size="sm"
-          >
-            <PlusIcon className="w-4 h-4" />
-            <span className="ml-2">Add Event</span>
-          </Button>
-        </div>
+    <AdminPageWrapper 
+      title="Event Management" 
+      description="Create, edit, and manage all events"
+    >
+      {error && (
+        <Card className="mb-6 border-l-4 border-danger">
+          <CardBody className="gap-2">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="w-5 h-5 text-danger flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold text-danger">Error</p>
+                <p className="text-sm text-default-500">{error}</p>
+              </div>
+            </div>
+          </CardBody>
+        </Card>
+      )}
+
+      {/* Controls Section */}
+      <div className="flex flex-col sm:flex-row gap-2 w-full mb-6 md:mb-8">
+        <Button 
+          color="danger" 
+          variant="flat" 
+          onPress={handleDeletePastEvents}
+          className="w-full sm:w-auto"
+          size="sm"
+        >
+          <Trash2 className="w-4 h-4" />
+          <span className="hidden sm:inline ml-2">Delete Past Events</span>
+          <span className="sm:hidden ml-2">Delete Past</span>
+        </Button>
+        <Button 
+          color="primary" 
+          onPress={onOpen}
+          className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-pink-600"
+          size="sm"
+        >
+          <PlusIcon className="w-4 h-4" />
+          <span className="ml-2">Add Event</span>
+        </Button>
       </div>
 
       {/* Stats Cards */}
@@ -793,6 +807,6 @@ export default function AdminEventsPage() {
           </form>
         </ModalContent>
       </Modal>
-    </div>
+    </AdminPageWrapper>
   );
 }
