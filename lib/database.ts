@@ -8,7 +8,9 @@ export const DATABASE_ID = "68ee09da002cce9f7e39";
 export const EVENTS_COLLECTION_ID = "events";
 export const REGISTRATIONS_COLLECTION_ID = "registrations";
 export const PROJECTS_COLLECTION_ID = "projects";
+export const GALLERY_COLLECTION_ID = "gallery";
 export const EVENT_IMAGES_BUCKET_ID = "68ed50100010aa893cf8";
+export const GALLERY_IMAGES_BUCKET_ID = "69126ef7000269c07764";
 
 // Event Interface - status is optional
 export interface Event {
@@ -72,7 +74,24 @@ export interface Project {
   $updatedAt?: string;
 }
 
-// Event Service - COMPLETE with all missing methods
+// Gallery Image Interface
+export interface GalleryImage {
+  $id?: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  category: "events" | "workshops" | "hackathons" | "team" | "projects";
+  date: string;
+  attendees: number;
+  uploadedBy: string;
+  isApproved: boolean;
+  isFeatured: boolean;
+  tags: string[];
+  eventId?: string;
+  $createdAt?: string;
+  $updatedAt?: string;
+}
+
 export const eventService = {
   // Get all events
   async getAllEvents(queries: string[] = []) {
@@ -420,6 +439,177 @@ export const projectService = {
       return true;
     } catch (error) {
       console.error("Error deleting project:", error);
+      throw error;
+    }
+  },
+};
+
+// Gallery Service
+export const galleryService = {
+  // Get all gallery images
+  async getAllImages(queries: string[] = []) {
+    try {
+      const response = await databases.listDocuments(
+        DATABASE_ID,
+        GALLERY_COLLECTION_ID,
+        queries
+      );
+      return response.documents as unknown as GalleryImage[];
+    } catch (error) {
+      console.error("Error fetching gallery images:", error);
+      throw error;
+    }
+  },
+
+  // Get approved gallery images (public view)
+  async getApprovedImages() {
+    try {
+      const response = await databases.listDocuments(
+        DATABASE_ID,
+        GALLERY_COLLECTION_ID,
+        [
+          Query.equal("isApproved", true),
+          Query.orderDesc("$createdAt"),
+          Query.limit(100),
+        ]
+      );
+      return response.documents as unknown as GalleryImage[];
+    } catch (error) {
+      console.error("Error fetching approved gallery images:", error);
+      throw error;
+    }
+  },
+
+  // Get featured gallery images
+  async getFeaturedImages() {
+    try {
+      const response = await databases.listDocuments(
+        DATABASE_ID,
+        GALLERY_COLLECTION_ID,
+        [
+          Query.equal("isApproved", true),
+          Query.equal("isFeatured", true),
+          Query.orderDesc("$createdAt"),
+          Query.limit(20),
+        ]
+      );
+      return response.documents as unknown as GalleryImage[];
+    } catch (error) {
+      console.error("Error fetching featured gallery images:", error);
+      throw error;
+    }
+  },
+
+  // Get images by category
+  async getImagesByCategory(category: string) {
+    try {
+      const response = await databases.listDocuments(
+        DATABASE_ID,
+        GALLERY_COLLECTION_ID,
+        [
+          Query.equal("isApproved", true),
+          Query.equal("category", category),
+          Query.orderDesc("$createdAt"),
+          Query.limit(50),
+        ]
+      );
+      return response.documents as unknown as GalleryImage[];
+    } catch (error) {
+      console.error("Error fetching images by category:", error);
+      throw error;
+    }
+  },
+
+  // Get image by ID
+  async getImageById(imageId: string) {
+    try {
+      const response = await databases.getDocument(
+        DATABASE_ID,
+        GALLERY_COLLECTION_ID,
+        imageId
+      );
+      return response as unknown as GalleryImage;
+    } catch (error) {
+      console.error("Error fetching gallery image:", error);
+      throw error;
+    }
+  },
+
+  // Create gallery image (user/admin)
+  async createImage(imageData: Omit<GalleryImage, '$id' | '$createdAt' | '$updatedAt'>) {
+    try {
+      const response = await databases.createDocument(
+        DATABASE_ID,
+        GALLERY_COLLECTION_ID,
+        ID.unique(),
+        imageData
+      );
+      return response as unknown as GalleryImage;
+    } catch (error) {
+      console.error("Error creating gallery image:", error);
+      throw error;
+    }
+  },
+
+  // Update gallery image (admin)
+  async updateImage(imageId: string, imageData: Partial<GalleryImage>) {
+    try {
+      const response = await databases.updateDocument(
+        DATABASE_ID,
+        GALLERY_COLLECTION_ID,
+        imageId,
+        imageData
+      );
+      return response as unknown as GalleryImage;
+    } catch (error) {
+      console.error("Error updating gallery image:", error);
+      throw error;
+    }
+  },
+
+  // Approve gallery image (admin)
+  async approveImage(imageId: string) {
+    try {
+      const response = await databases.updateDocument(
+        DATABASE_ID,
+        GALLERY_COLLECTION_ID,
+        imageId,
+        { isApproved: true }
+      );
+      return response as unknown as GalleryImage;
+    } catch (error) {
+      console.error("Error approving gallery image:", error);
+      throw error;
+    }
+  },
+
+  // Delete gallery image (admin)
+  async deleteImage(imageId: string) {
+    try {
+      await databases.deleteDocument(
+        DATABASE_ID,
+        GALLERY_COLLECTION_ID,
+        imageId
+      );
+      return true;
+    } catch (error) {
+      console.error("Error deleting gallery image:", error);
+      throw error;
+    }
+  },
+
+  // Toggle featured status
+  async toggleFeatured(imageId: string, isFeatured: boolean) {
+    try {
+      const response = await databases.updateDocument(
+        DATABASE_ID,
+        GALLERY_COLLECTION_ID,
+        imageId,
+        { isFeatured }
+      );
+      return response as unknown as GalleryImage;
+    } catch (error) {
+      console.error("Error toggling featured status:", error);
       throw error;
     }
   },
