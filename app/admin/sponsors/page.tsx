@@ -9,23 +9,28 @@ import { Textarea } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
 import { Switch } from "@heroui/switch";
 import { Chip } from "@heroui/chip";
+import { useAuth } from "@/context/AuthContext";
+import AdminPageWrapper from "@/components/AdminPageWrapper";
+import { getErrorMessage } from "@/lib/errorHandler";
 import { 
   PlusIcon, 
   EditIcon, 
   TrashIcon, 
   ExternalLinkIcon,
   CheckIcon,
-  XIcon 
+  XIcon,
+  AlertCircle
 } from "lucide-react";
 import { Sponsor, sponsorService, sponsorTiers } from "@/lib/sponsors";
-import { getErrorMessage } from "@/lib/errorHandler";
 
 export default function AdminSponsorsPage() {
+  const { user, loading: authLoading } = useAuth();
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingSponsor, setEditingSponsor] = useState<Sponsor | null>(null);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Form state
   const [formData, setFormData] = useState<Sponsor>({
@@ -43,16 +48,21 @@ export default function AdminSponsorsPage() {
   });
 
   useEffect(() => {
-    loadSponsors();
-  }, []);
+    if (!authLoading && user) {
+      loadSponsors();
+    }
+  }, [user, authLoading]);
 
   const loadSponsors = async () => {
     try {
+      setError(null);
+      setLoading(true);
       const allSponsors = await sponsorService.getAllSponsors();
       setSponsors(allSponsors);
-    } catch (error) {
-      console.error("Error loading sponsors:", error);
-      alert("Failed to load sponsors");
+    } catch (err) {
+      const errorMsg = getErrorMessage(err);
+      console.error("Error loading sponsors:", errorMsg);
+      setError(`Failed to load sponsors: ${errorMsg}`);
     } finally {
       setLoading(false);
     }
@@ -160,25 +170,41 @@ export default function AdminSponsorsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto" />
-          <p className="mt-4">Loading sponsors...</p>
+      <AdminPageWrapper 
+        title="Sponsors Management" 
+        description="Loading..."
+      >
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto" />
+            <p className="mt-4">Loading sponsors...</p>
+          </div>
         </div>
-      </div>
+      </AdminPageWrapper>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      {/* Header */}
+    <AdminPageWrapper 
+      title="Sponsors Management" 
+      description="Manage your club sponsors and partners"
+    >
+      {error && (
+        <Card className="mb-6 border-l-4 border-danger">
+          <CardBody className="gap-2">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="w-5 h-5 text-danger flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold text-danger">Error</p>
+                <p className="text-sm text-default-500">{error}</p>
+              </div>
+            </div>
+          </CardBody>
+        </Card>
+      )}
+
+      {/* Controls */}
       <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold">Sponsors Management</h1>
-          <p className="text-default-600 mt-2">
-            Manage your club sponsors and partners
-          </p>
-        </div>
         <Button
           color="primary"
           size="lg"
@@ -456,6 +482,6 @@ export default function AdminSponsorsPage() {
           </div>
         )}
       </div>
-    </div>
+    </AdminPageWrapper>
   );
 }

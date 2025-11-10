@@ -10,15 +10,19 @@ import { Textarea } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
 import { Switch } from "@heroui/switch";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { projectService, Project } from "@/lib/database";
 import { getErrorMessage } from "@/lib/errorHandler";
-import { PlusIcon, Edit2Icon, TrashIcon, SaveIcon, Loader2Icon, ImageIcon, UsersIcon, GitForkIcon, StarIcon, FolderIcon, InfoIcon, LightbulbIcon } from "lucide-react";
+import AdminPageWrapper from "@/components/AdminPageWrapper";
+import { PlusIcon, Edit2Icon, TrashIcon, SaveIcon, Loader2Icon, ImageIcon, UsersIcon, GitForkIcon, StarIcon, FolderIcon, InfoIcon, LightbulbIcon, AlertCircle } from "lucide-react";
 
 export default function AdminProjectsPage() {
+  const { user, loading: authLoading } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isEditing, setIsEditing] = useState(false);
 
@@ -68,20 +72,24 @@ export default function AdminProjectsPage() {
   // Fetch projects
   const fetchProjects = async () => {
     try {
+      setError(null);
       setLoading(true);
       const data = await projectService.getAllProjects();
       setProjects(data);
-    } catch (error) {
-      console.error("Error fetching projects:", error);
-      alert("Failed to fetch projects. Check console for details.");
+    } catch (err) {
+      const errorMsg = getErrorMessage(err);
+      console.error("Error fetching projects:", errorMsg);
+      setError(`Failed to fetch projects: ${errorMsg}`);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchProjects();
-  }, []);
+    if (!authLoading && user) {
+      fetchProjects();
+    }
+  }, [user, authLoading]);
 
   // Reset form
   const resetForm = () => {
@@ -249,23 +257,42 @@ export default function AdminProjectsPage() {
     }
   };
 
-  return (
-    <div className="min-h-screen  p-4 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header Section */}
-        <div className="text-center space-y-4 relative">
-          <div className="absolute top-0 left-1/3 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute top-10 right-1/3 w-72 h-72 bg-pink-500/10 rounded-full blur-3xl animate-pulse" />
-          
-          <div className="relative z-10">
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
-              Project Management
-            </h1>
-            <p className="text-lg text-gray-600 dark:text-gray-400 mt-2 max-w-2xl mx-auto">
-              Manage and organize all club projects
-            </p>
+  if (loading) {
+    return (
+      <AdminPageWrapper 
+        title="Project Management" 
+        description="Loading..."
+      >
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto" />
+            <p className="mt-4">Loading projects...</p>
           </div>
         </div>
+      </AdminPageWrapper>
+    );
+  }
+
+  return (
+    <AdminPageWrapper 
+      title="Project Management" 
+      description="Manage and organize all club projects"
+    >
+      {error && (
+        <Card className="mb-6 border-l-4 border-danger">
+          <CardBody className="gap-2">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="w-5 h-5 text-danger flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold text-danger">Error</p>
+                <p className="text-sm text-default-500">{error}</p>
+              </div>
+            </div>
+          </CardBody>
+        </Card>
+      )}
+
+      <div className="space-y-8">
 
         {/* Admin Tips Section */}
         <Card className="border-none shadow-lg bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30">
@@ -787,30 +814,30 @@ export default function AdminProjectsPage() {
             </ModalFooter>
           </ModalContent>
         </Modal>
-      </div>
 
-      <style jsx>{`
-        .slider::-webkit-slider-thumb {
-          appearance: none;
-          height: 18px;
-          width: 18px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #8b5cf6, #ec4899);
-          cursor: pointer;
-          border: 2px solid #ffffff;
-          box-shadow: 0 2px 6px rgba(139, 92, 246, 0.3);
-        }
-        
-        .slider::-moz-range-thumb {
-          height: 18px;
-          width: 18px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #8b5cf6, #ec4899);
-          cursor: pointer;
-          border: 2px solid #ffffff;
-          box-shadow: 0 2px 6px rgba(139, 92, 246, 0.3);
-        }
-      `}</style>
-    </div>
+        <style jsx>{`
+          .slider::-webkit-slider-thumb {
+            appearance: none;
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            cursor: pointer;
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 6px rgba(139, 92, 246, 0.3);
+          }
+          
+          .slider::-moz-range-thumb {
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            cursor: pointer;
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 6px rgba(139, 92, 246, 0.3);
+          }
+        `}</style>
+      </div>
+    </AdminPageWrapper>
   );
 }

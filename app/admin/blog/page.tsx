@@ -9,7 +9,10 @@ import { Avatar } from "@heroui/avatar";
 import { Tabs, Tab } from "@heroui/tabs";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
 import { Textarea } from "@heroui/input";
+import { useAuth } from "@/context/AuthContext";
 import { blogService, Blog } from "@/lib/blog";
+import AdminPageWrapper from "@/components/AdminPageWrapper";
+import { getErrorMessage } from "@/lib/errorHandler";
 import {
   CheckIcon,
   XIcon,
@@ -17,14 +20,17 @@ import {
   TrashIcon,
   ClockIcon,
   StarIcon,
+  AlertCircle,
 } from "lucide-react";
 
 export default function AdminBlogsPage() {
+  const { user, loading: authLoading } = useAuth();
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [filteredBlogs, setFilteredBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTab, setSelectedTab] = useState("pending");
   const [processingBlog, setProcessingBlog] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Rejection modal
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
@@ -32,8 +38,10 @@ export default function AdminBlogsPage() {
   const [rejectionReason, setRejectionReason] = useState("");
 
   useEffect(() => {
-    loadBlogs();
-  }, []);
+    if (!authLoading && user) {
+      loadBlogs();
+    }
+  }, [user, authLoading]);
 
   useEffect(() => {
     filterBlogsByTab();
@@ -41,10 +49,14 @@ export default function AdminBlogsPage() {
 
   const loadBlogs = async () => {
     try {
+      setError(null);
+      setLoading(true);
       const allBlogs = await blogService.getAllBlogs();
       setBlogs(allBlogs);
-    } catch (error) {
-      console.error("Error loading blogs:", error);
+    } catch (err) {
+      const errorMsg = getErrorMessage(err);
+      console.error("Error loading blogs:", errorMsg);
+      setError(`Failed to load blogs: ${errorMsg}`);
     } finally {
       setLoading(false);
     }
@@ -149,24 +161,38 @@ export default function AdminBlogsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto" />
-          <p className="mt-4">Loading blogs...</p>
+      <AdminPageWrapper 
+        title="Blog Management" 
+        description="Loading..."
+      >
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto" />
+            <p className="mt-4">Loading blogs...</p>
+          </div>
         </div>
-      </div>
+      </AdminPageWrapper>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Blog Management</h1>
-        <p className="text-default-600 mt-2">
-          Review and manage blog submissions
-        </p>
-      </div>
+    <AdminPageWrapper 
+      title="Blog Management" 
+      description="Review and manage blog submissions"
+    >
+      {error && (
+        <Card className="mb-6 border-l-4 border-danger">
+          <CardBody className="gap-2">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="w-5 h-5 text-danger flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold text-danger">Error</p>
+                <p className="text-sm text-default-500">{error}</p>
+              </div>
+            </div>
+          </CardBody>
+        </Card>
+      )}
 
       {/* Tabs */}
       <Tabs
@@ -408,6 +434,6 @@ export default function AdminBlogsPage() {
           </ModalFooter>
         </ModalContent>
       </Modal>
-    </div>
+    </AdminPageWrapper>
   );
 }
