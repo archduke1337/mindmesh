@@ -10,6 +10,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
   loginWithGoogle: () => void;
+  loginWithGitHub: () => void;
   logout: () => Promise<void>;
 }
 
@@ -19,6 +20,7 @@ const AuthContext = createContext<AuthContextType>({
   login: async () => {},
   register: async () => {},
   loginWithGoogle: () => {},
+  loginWithGitHub: () => {},
   logout: async () => {},
 });
 
@@ -57,13 +59,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     authService.loginWithGoogle();
   };
 
+  const loginWithGitHub = () => {
+    authService.loginWithGitHub();
+  };
+
   const logout = async () => {
     await authService.logout();
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, loginWithGoogle, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, loginWithGoogle, loginWithGitHub, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -68,6 +68,28 @@ export const authService = {
     }
   },
 
+  // GitHub OAuth Login
+  loginWithGitHub() {
+    try {
+      const successUrl = typeof window !== 'undefined' 
+        ? `${window.location.origin}/auth/callback`
+        : '/auth/callback';
+      
+      const failureUrl = typeof window !== 'undefined'
+        ? `${window.location.origin}/login`
+        : '/login';
+
+      account.createOAuth2Session(
+        "github" as any,
+        successUrl,
+        failureUrl
+      );
+    } catch (error) {
+      console.error("GitHub OAuth error:", error);
+      throw error;
+    }
+  },
+
   // Get current user
   async getCurrentUser() {
     try {
