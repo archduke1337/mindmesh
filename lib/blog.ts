@@ -1,13 +1,17 @@
-// lib/blogs.ts
+// lib/blog.ts
 import { ID, Query } from "appwrite";
 import { databases, storage } from "./appwrite";
 import { DATABASE_ID } from "./database";
+import { getErrorMessage } from "./errorHandler";
 
 // Collection IDs
 export const BLOGS_COLLECTION_ID = "blogs";
 export const BLOG_IMAGES_BUCKET_ID = "blog-images";
 
-// Blog Interface
+// Blog Status Types
+export type BlogStatus = "draft" | "pending" | "approved" | "rejected";
+
+// Blog Interface - All columns must match Appwrite database
 export interface Blog {
   $id?: string;
   title: string;
@@ -21,7 +25,7 @@ export interface Blog {
   authorName: string;
   authorEmail: string;
   authorAvatar?: string;
-  status: "draft" | "pending" | "approved" | "rejected";
+  status: BlogStatus; // draft, pending, approved, rejected
   rejectionReason?: string;
   publishedAt?: string;
   views: number;
@@ -31,6 +35,17 @@ export interface Blog {
   $createdAt?: string;
   $updatedAt?: string;
 }
+
+// Blog Categories
+export const blogCategories = [
+  "Technology",
+  "Design",
+  "Development",
+  "Business",
+  "Tutorial",
+  "News",
+  "Other"
+];
 
 // Blog Service
 export const blogService = {
@@ -291,18 +306,3 @@ export const blogService = {
     return Math.ceil(wordCount / wordsPerMinute);
   },
 };
-
-// Blog Categories
-export const blogCategories = [
-  { value: "technology", label: "Technology" },
-  { value: "ai-ml", label: "AI & Machine Learning" },
-  { value: "web-dev", label: "Web Development" },
-  { value: "mobile-dev", label: "Mobile Development" },
-  { value: "data-science", label: "Data Science" },
-  { value: "cybersecurity", label: "Cybersecurity" },
-  { value: "design", label: "Design" },
-  { value: "career", label: "Career & Growth" },
-  { value: "tutorial", label: "Tutorial" },
-  { value: "news", label: "News & Updates" },
-  { value: "other", label: "Other" },
-];
