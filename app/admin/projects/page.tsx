@@ -129,7 +129,7 @@ export default function AdminProjectsPage() {
       description: project.description,
       image: project.image,
       category: project.category,
-      status: project.status,
+      status: project.status || "active",
       progress: project.progress,
       technologies: Array.isArray(project.technologies) ? project.technologies.join(", ") : "",
       stars: project.stars,
@@ -424,13 +424,13 @@ export default function AdminProjectsPage() {
                             <TableCell>
                               <Chip
                                 size="sm"
-                                color={getStatusColor(project.status) as any}
+                                color={getStatusColor(project.status || "active") as any}
                                 variant="dot"
                                 classNames={{
                                   base: "capitalize font-medium"
                                 }}
                               >
-                                {project.status.replace('-', ' ')}
+                                {(project.status || "active").replace('-', ' ')}
                               </Chip>
                             </TableCell>
                             <TableCell>

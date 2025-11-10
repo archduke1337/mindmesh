@@ -58,7 +58,7 @@ export interface Project {
   description: string;
   image: string;
   category: string;
-  status: string;
+  status?: string;
   progress: number;
   technologies: string[];
   stars: number;
