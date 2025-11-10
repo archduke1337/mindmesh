@@ -93,9 +93,14 @@ export const Navbar = () => {
               aria-label="Navigation menu"
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}
+              onAction={() => setIsMenuOpen(false)}
             >
               {siteConfig.navItems.map((item) => (
-                <DropdownItem key={item.href} href={item.href}>
+                <DropdownItem 
+                  key={item.href} 
+                  href={item.href}
+                  onClick={() => setIsMenuOpen(false)}
+                >
                   {item.label}
                 </DropdownItem>
               ))}
