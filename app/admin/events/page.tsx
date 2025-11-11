@@ -12,21 +12,25 @@ import { Chip } from "@heroui/chip";
 import { Tabs, Tab } from "@heroui/tabs";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { eventService, Event } from "@/lib/database";
+import { eventService, Event, Registration } from "@/lib/database";
 import { getErrorMessage } from "@/lib/errorHandler";
 import AdminPageWrapper from "@/components/AdminPageWrapper";
-import { PlusIcon, Pencil, Trash2, Image as ImageIcon, CalendarIcon, MapPinIcon, UsersIcon, DollarSignIcon, TagIcon, StarIcon, CrownIcon, TrendingUpIcon, LinkIcon, AlertCircle } from "lucide-react";
+import { PlusIcon, Pencil, Trash2, Image as ImageIcon, CalendarIcon, MapPinIcon, UsersIcon, DollarSignIcon, TagIcon, StarIcon, CrownIcon, TrendingUpIcon, LinkIcon, AlertCircle, XIcon } from "lucide-react";
 
 export default function AdminEventsPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen: isRegistrationsOpen, onOpen: onRegistrationsOpen, onClose: onRegistrationsClose } = useDisclosure();
 
   const [events, setEvents] = useState<Event[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(true);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [registrations, setRegistrations] = useState<Registration[]>([]);
+  const [loadingRegistrations, setLoadingRegistrations] = useState(false);
+  const [selectedEventForRegistrations, setSelectedEventForRegistrations] = useState<Event | null>(null);
 
   // Form state
   const [formData, setFormData] = useState<Partial<Event>>({
@@ -149,6 +153,21 @@ export default function AdminEventsPage() {
     } finally {
       setDeletingId(null);
     }
+  };
+
+  const handleViewRegistrations = async (event: Event) => {
+    setSelectedEventForRegistrations(event);
+    setLoadingRegistrations(true);
+    try {
+      const regs = await eventService.getEventRegistrations(event.$id!);
+      setRegistrations(regs);
+    } catch (err) {
+      console.error("Error loading registrations:", err);
+      alert("Failed to load registrations");
+    } finally {
+      setLoadingRegistrations(false);
+    }
+    onRegistrationsOpen();
   };
 
   const handleDeletePastEvents = async () => {
@@ -372,6 +391,15 @@ export default function AdminEventsPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-1 md:gap-2">
+                        <Button
+                          size="sm"
+                          variant="light"
+                          isIconOnly
+                          title="View registrations"
+                          onPress={() => handleViewRegistrations(event)}
+                        >
+                          <UsersIcon className="w-3 h-3 md:w-4 md:h-4" />
+                        </Button>
                         <Button
                           size="sm"
                           variant="light"
@@ -805,6 +833,65 @@ export default function AdminEventsPage() {
               </Button>
             </ModalFooter>
           </form>
+        </ModalContent>
+      </Modal>
+
+      {/* Registrations Modal */}
+      <Modal 
+        isOpen={isRegistrationsOpen} 
+        onClose={onRegistrationsClose} 
+        size="2xl"
+        scrollBehavior="inside"
+      >
+        <ModalContent>
+          <ModalHeader className="flex flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <UsersIcon className="w-5 h-5" />
+              <span>Event Registrations</span>
+            </div>
+            {selectedEventForRegistrations && (
+              <p className="text-sm text-default-500 font-normal">
+                {selectedEventForRegistrations.title}
+              </p>
+            )}
+          </ModalHeader>
+          <ModalBody>
+            {loadingRegistrations ? (
+              <div className="flex justify-center items-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+              </div>
+            ) : registrations.length > 0 ? (
+              <div className="max-h-96 overflow-y-auto">
+                <Table aria-label="Registrations table" isStriped>
+                  <TableHeader>
+                    <TableColumn>NAME</TableColumn>
+                    <TableColumn>EMAIL</TableColumn>
+                    <TableColumn className="hidden sm:table-cell">REGISTERED AT</TableColumn>
+                  </TableHeader>
+                  <TableBody>
+                    {registrations.map((reg) => (
+                      <TableRow key={reg.$id}>
+                        <TableCell>{reg.userName}</TableCell>
+                        <TableCell className="text-sm">{reg.userEmail}</TableCell>
+                        <TableCell className="hidden sm:table-cell text-xs">
+                          {new Date(reg.registeredAt).toLocaleDateString()}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <div className="flex justify-center items-center py-8 text-default-500">
+                <p>No registrations yet</p>
+              </div>
+            )}
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="light" onPress={onRegistrationsClose}>
+              Close
+            </Button>
+          </ModalFooter>
         </ModalContent>
       </Modal>
     </AdminPageWrapper>

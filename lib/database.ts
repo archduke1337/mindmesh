@@ -318,6 +318,24 @@ export const eventService = {
     }
   },
 
+  // Get all registrations for an event (admin)
+  async getEventRegistrations(eventId: string) {
+    try {
+      const response = await databases.listDocuments(
+        DATABASE_ID,
+        REGISTRATIONS_COLLECTION_ID,
+        [
+          Query.equal("eventId", eventId),
+          Query.orderDesc("registeredAt")
+        ]
+      );
+      return response.documents as unknown as Registration[];
+    } catch (error) {
+      console.error("Error fetching event registrations:", error);
+      return [];
+    }
+  },
+
   // Check if user is registered for an event
   async isUserRegistered(eventId: string, userId: string): Promise<boolean> {
     try {
