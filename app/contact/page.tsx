@@ -191,10 +191,10 @@ export default function ContactPage() {
               <p className="text-default-600 mt-2 text-xs sm:text-small md:text-base">Fill out the form below and we'll get back to you shortly</p>
             </CardHeader>
             <CardBody className="p-4 sm:p-6 md:p-8">
-              <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4 lg:space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5 lg:space-y-6">
                 {submitStatus.type && (
                   <div
-                    className={`p-3 md:p-4 rounded-lg text-sm ${submitStatus.type === "success"
+                    className={`p-3 md:p-4 rounded-lg text-xs md:text-small font-medium ${submitStatus.type === "success"
                       ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200"
                       : "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200"
                       }`}
@@ -213,6 +213,10 @@ export default function ContactPage() {
                     variant="bordered"
                     size="lg"
                     isDisabled={isSubmitting}
+                    classNames={{
+                      input: "text-sm md:text-base",
+                      label: "text-xs md:text-small font-semibold"
+                    }}
                   />
                   <Input
                     isRequired
@@ -224,6 +228,10 @@ export default function ContactPage() {
                     variant="bordered"
                     size="lg"
                     isDisabled={isSubmitting}
+                    classNames={{
+                      input: "text-sm md:text-base",
+                      label: "text-xs md:text-small font-semibold"
+                    }}
                   />
                 </div>
                 <Input
@@ -235,6 +243,10 @@ export default function ContactPage() {
                   variant="bordered"
                   size="lg"
                   isDisabled={isSubmitting}
+                  classNames={{
+                    input: "text-sm md:text-base",
+                    label: "text-xs md:text-small font-semibold"
+                  }}
                 />
                 <Textarea
                   isRequired
@@ -246,6 +258,10 @@ export default function ContactPage() {
                   minRows={5}
                   size="lg"
                   isDisabled={isSubmitting}
+                  classNames={{
+                    input: "text-sm md:text-base",
+                    label: "text-xs md:text-small font-semibold"
+                  }}
                 />
                 <Button
                   type="submit"

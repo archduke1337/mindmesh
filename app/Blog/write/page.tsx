@@ -193,11 +193,11 @@ export default function WriteBlogPage() {
 
       {/* Form */}
       <Card className="border-none shadow-xl">
-        <CardHeader className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 px-6 sm:px-8">
-          <h2 className="text-lg md:text-xl font-bold">Blog Details</h2>
+        <CardHeader className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 px-4 sm:px-6 md:px-8 py-4 md:py-6">
+          <h2 className="text-lg md:text-2xl font-bold">Blog Details</h2>
         </CardHeader>
-        <CardBody className="p-6 sm:p-8">
-          <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
+        <CardBody className="p-4 sm:p-6 md:p-8">
+          <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6 lg:space-y-8">
             {/* Title */}
             <Input
               label="Blog Title"
@@ -209,6 +209,10 @@ export default function WriteBlogPage() {
               required
               isRequired
               size="lg"
+              classNames={{
+                input: "text-sm md:text-base",
+                label: "text-xs md:text-small font-semibold"
+              }}
             />
 
             {/* Excerpt */}
@@ -221,6 +225,11 @@ export default function WriteBlogPage() {
               }
               rows={3}
               description="If not provided, first 150 characters will be used"
+              size="lg"
+              classNames={{
+                input: "text-sm md:text-base",
+                label: "text-xs md:text-small font-semibold"
+              }}
             />
 
             {/* Category */}
@@ -233,6 +242,10 @@ export default function WriteBlogPage() {
               }
               required
               isRequired
+              size="lg"
+              classNames={{
+                label: "text-xs md:text-small font-semibold"
+              }}
             >
               {blogCategories.map((cat) => (
                 <SelectItem key={cat.value}>{cat.label}</SelectItem>
@@ -248,15 +261,20 @@ export default function WriteBlogPage() {
                 setFormData({ ...formData, tags: e.target.value })
               }
               description="Add relevant tags separated by commas"
+              size="lg"
+              classNames={{
+                input: "text-sm md:text-base",
+                label: "text-xs md:text-small font-semibold"
+              }}
             />
 
             {/* Cover Image */}
-            <div className="space-y-4">
-              <label className="text-sm font-medium">
+            <div className="space-y-3 md:space-y-4 pt-2">
+              <label className="text-xs md:text-small font-semibold">
                 Cover Image <span className="text-danger">*</span>
               </label>
 
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                 {/* Upload Button */}
                 <div>
                   <input
@@ -274,9 +292,10 @@ export default function WriteBlogPage() {
                     htmlFor="cover-image-upload"
                     variant="flat"
                     color="primary"
-                    startContent={<ImageIcon className="w-5 h-5" />}
+                    startContent={<ImageIcon className="w-4 md:w-5 h-4 md:h-5" />}
                     isLoading={uploadingImage}
                     className="w-full"
+                    size="lg"
                   >
                     {uploadingImage ? "Uploading..." : "Upload Image"}
                   </Button>
@@ -292,17 +311,21 @@ export default function WriteBlogPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, coverImage: e.target.value })
                   }
+                  size="lg"
+                  classNames={{
+                    input: "text-sm md:text-base"
+                  }}
                 />
               </div>
 
               {/* Image Preview */}
               {formData.coverImage && (
-                <div className="border-2 border-dashed border-default-300 rounded-lg p-4">
-                  <p className="text-sm font-medium mb-2">Preview:</p>
+                <div className="border-2 border-dashed border-default-300 rounded-lg p-3 md:p-4">
+                  <p className="text-xs md:text-small font-medium mb-3">Preview:</p>
                   <img
                     src={formData.coverImage}
                     alt="Cover preview"
-                    className="w-full h-48 object-cover rounded-lg"
+                    className="w-full h-40 sm:h-48 md:h-56 object-cover rounded-lg"
                     onError={() => {
                       alert("Invalid image URL");
                       setFormData({ ...formData, coverImage: "" });
@@ -324,20 +347,26 @@ export default function WriteBlogPage() {
               isRequired
               rows={15}
               description="Write in plain text or Markdown format"
+              size="lg"
+              classNames={{
+                input: "text-sm md:text-base",
+                label: "text-xs md:text-small font-semibold"
+              }}
             />
 
             {/* Word Count */}
-            <div className="text-sm text-default-500">
+            <div className="text-xs md:text-small text-default-500 bg-default/40 px-3 md:px-4 py-2 md:py-3 rounded-lg">
               {formData.content.split(/\s+/).filter((w) => w).length} words •{" "}
               {blogService.calculateReadTime(formData.content)} min read
             </div>
 
             {/* Submit Button */}
-            <div className="flex gap-4 pt-4">
+            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 pt-2 md:pt-4">
               <Button
                 variant="flat"
                 onPress={() => router.back()}
                 className="flex-1"
+                size="lg"
               >
                 Cancel
               </Button>
@@ -345,16 +374,17 @@ export default function WriteBlogPage() {
                 type="submit"
                 color="primary"
                 isLoading={submitting}
-                endContent={<SendIcon className="w-5 h-5" />}
+                endContent={<SendIcon className="w-4 md:w-5 h-4 md:h-5" />}
                 className="flex-1"
+                size="lg"
               >
                 Submit for Review
               </Button>
             </div>
 
             {/* Info */}
-            <div className="bg-primary/10 rounded-lg p-4 border border-primary/20">
-              <p className="text-sm">
+            <div className="bg-primary/10 rounded-lg p-3 md:p-4 border border-primary/20">
+              <p className="text-xs md:text-small">
                 <strong>Note:</strong> Your blog will be reviewed by our team
                 before being published. You'll be notified once it's approved!
               </p>
