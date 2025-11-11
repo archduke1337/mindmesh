@@ -1,10 +1,12 @@
 // lib/adminAuth.ts
 /**
  * Admin Authentication and Authorization utilities
- * Verifies user has admin access before allowing admin page access
+ * NOTE: The main admin auth uses email-based checks from lib/adminConfig.ts
+ * This file provides role-based checks as a supplement for future role-based RBAC
  */
 
 import { Models } from "appwrite";
+import { isUserAdminByEmail } from "./adminConfig";
 
 export const ADMIN_ROLES = ["admin", "moderator", "owner"];
 
@@ -14,19 +16,13 @@ export interface AdminUser extends Models.User<Models.Preferences> {
 }
 
 /**
- * Check if user has admin access
- * Note: This is a client-side check. Always verify on backend for real security.
+ * Check if user has admin access (uses email-based system)
+ * This is the primary method used throughout the app
  */
 export function isUserAdmin(user: Models.User<Models.Preferences> | null): boolean {
   if (!user) return false;
-  
-  // Check user preferences for admin role
-  if (user.prefs) {
-    const prefs = user.prefs as any;
-    return ADMIN_ROLES.includes(prefs.role);
-  }
-  
-  return false;
+  // Use email-based admin check from adminConfig
+  return isUserAdminByEmail(user.email);
 }
 
 /**
@@ -48,17 +44,20 @@ export function canUserPerformAction(
 ): boolean {
   if (!user) return false;
   
+  // Check if user is admin first
+  if (!isUserAdmin(user)) return false;
+  
   const role = getUserRole(user);
   
   switch (action) {
     case "create":
-      return ["admin", "moderator"].includes(role);
+      return ["admin", "moderator"].includes(role) || isUserAdmin(user);
     case "edit":
-      return ["admin", "moderator"].includes(role);
+      return ["admin", "moderator"].includes(role) || isUserAdmin(user);
     case "delete":
-      return role === "admin";
+      return role === "admin" || isUserAdmin(user);
     case "approve":
-      return ["admin", "moderator"].includes(role);
+      return ["admin", "moderator"].includes(role) || isUserAdmin(user);
     default:
       return false;
   }

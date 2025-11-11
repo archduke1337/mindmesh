@@ -12,5 +12,7 @@ export const ADMIN_EMAILS = [
 
 export function isUserAdminByEmail(email: string | undefined): boolean {
   if (!email) return false;
-  return ADMIN_EMAILS.includes(email);
+  // Case-insensitive email comparison (emails should always be lowercase, but be safe)
+  const normalizedEmail = email.toLowerCase().trim();
+  return ADMIN_EMAILS.some(adminEmail => adminEmail.toLowerCase() === normalizedEmail);
 }
