@@ -251,20 +251,21 @@ export default function EventDetailPage() {
   }
 
   return (
-    <div className="pb-20">
+    <div className="pb-12 sm:pb-16 md:pb-20 lg:pb-24">
       {/* Back Button */}
-      <div className="max-w-7xl mx-auto px-6 py-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
         <Button
           variant="light"
-          startContent={<ArrowLeftIcon className="w-4 h-4" />}
+          startContent={<ArrowLeftIcon className="w-3.5 sm:w-4 md:w-5 h-3.5 sm:h-4 md:h-5" />}
           onPress={() => router.back()}
+          className="text-xs sm:text-small md:text-base"
         >
           Back to Events
         </Button>
       </div>
 
       {/* Hero Image Section */}
-      <div className="relative h-[400px] md:h-[500px] w-full overflow-hidden">
+      <div className="relative h-64 sm:h-80 md:h-96 lg:h-[500px] w-full overflow-hidden">
         <img
           src={event.image}
           alt={event.title}
@@ -273,15 +274,16 @@ export default function EventDetailPage() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
         
         {/* Floating Action Buttons */}
-        <div className="absolute top-6 right-6 flex gap-2">
+        <div className="absolute top-3 sm:top-4 md:top-6 right-3 sm:right-4 md:right-6 flex gap-1.5 sm:gap-2">
           <Button
             isIconOnly
             variant="flat"
+            size="sm"
             className="bg-white/90 dark:bg-black/90 backdrop-blur-sm"
             onPress={toggleSave}
           >
             <HeartIcon 
-              className={`w-5 h-5 ${
+              className={`w-3.5 sm:w-4 md:w-5 h-3.5 sm:h-4 md:h-5 ${
                 isSaved ? "fill-red-500 text-red-500" : "text-gray-600"
               }`} 
             />
@@ -289,49 +291,50 @@ export default function EventDetailPage() {
           <Button
             isIconOnly
             variant="flat"
+            size="sm"
             className="bg-white/90 dark:bg-black/90 backdrop-blur-sm"
             onPress={handleShare}
           >
-            <ShareIcon className="w-5 h-5" />
+            <ShareIcon className="w-3.5 sm:w-4 md:w-5 h-3.5 sm:h-4 md:h-5" />
           </Button>
         </div>
 
         {/* Hero Content */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12">
+        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 md:p-8 lg:p-12">
           <div className="max-w-7xl mx-auto">
-            <div className="flex flex-wrap gap-2 mb-4">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2 md:gap-3 mb-2 sm:mb-3 md:mb-4">
               {event.isFeatured && (
-                <Badge color="warning" variant="solid" className="font-bold">
-                  <StarIcon className="w-3 h-3 mr-1" />
+                <Badge color="warning" variant="solid" className="font-bold text-[10px] sm:text-xs md:text-small">
+                  <StarIcon className="w-2.5 sm:w-3 md:w-3.5 h-2.5 sm:h-3 md:h-3.5 mr-1" />
                   Featured
                 </Badge>
               )}
               {event.isPremium && (
-                <Badge color="secondary" variant="solid" className="font-bold">
-                  <CrownIcon className="w-3 h-3 mr-1" />
+                <Badge color="secondary" variant="solid" className="font-bold text-[10px] sm:text-xs md:text-small">
+                  <CrownIcon className="w-2.5 sm:w-3 md:w-3.5 h-2.5 sm:h-3 md:h-3.5 mr-1" />
                   Premium
                 </Badge>
               )}
-              <Badge color="primary" variant="solid">
+              <Badge color="primary" variant="solid" className="text-[10px] sm:text-xs md:text-small">
                 {event.category}
               </Badge>
             </div>
             
-            <h1 className="text-3xl md:text-5xl font-bold text-white mb-4">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 sm:mb-3 md:mb-4">
               {event.title}
             </h1>
             
-            <div className="flex flex-wrap items-center gap-6 text-white/90">
-              <div className="flex items-center gap-2">
-                <CalendarIcon className="w-5 h-5" />
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4 md:gap-6 text-white/90 text-xs sm:text-small md:text-base">
+              <div className="flex items-center gap-1 sm:gap-2">
+                <CalendarIcon className="w-3.5 sm:w-4 md:w-5 h-3.5 sm:h-4 md:h-5 flex-shrink-0" />
                 <span className="font-medium">{formatDate(event.date)}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <ClockIcon className="w-5 h-5" />
+              <div className="flex items-center gap-1 sm:gap-2">
+                <ClockIcon className="w-3.5 sm:w-4 md:w-5 h-3.5 sm:h-4 md:h-5 flex-shrink-0" />
                 <span className="font-medium">{event.time}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <MapPinIcon className="w-5 h-5" />
+              <div className="flex items-center gap-1 sm:gap-2">
+                <MapPinIcon className="w-3.5 sm:w-4 md:w-5 h-3.5 sm:h-4 md:h-5 flex-shrink-0" />
                 <span className="font-medium">{event.location}</span>
               </div>
             </div>
@@ -340,17 +343,17 @@ export default function EventDetailPage() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="grid lg:grid-cols-3 gap-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-8 sm:py-10 md:py-12 lg:py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-10">
           {/* Left Column - Event Details */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-6 md:space-y-8 lg:space-y-10">
             {/* Description */}
             <Card className="border-none shadow-lg">
-              <CardHeader className="pb-0">
-                <h2 className="text-2xl font-bold">About This Event</h2>
+              <CardHeader className="pb-0 px-4 sm:px-6 md:px-8 pt-6">
+                <h2 className="text-lg sm:text-xl md:text-2xl font-bold">About This Event</h2>
               </CardHeader>
-              <CardBody className="pt-4">
-                <p className="text-default-600 leading-relaxed text-lg">
+              <CardBody className="pt-4 px-4 sm:px-6 md:px-8 pb-6">
+                <p className="text-xs sm:text-small md:text-base lg:text-lg text-default-600 leading-relaxed">
                   {event.description}
                 </p>
               </CardBody>
@@ -358,48 +361,48 @@ export default function EventDetailPage() {
 
             {/* Event Details Grid */}
             <Card className="border-none shadow-lg">
-              <CardHeader className="pb-0">
-                <h2 className="text-2xl font-bold">Event Details</h2>
+              <CardHeader className="pb-0 px-4 sm:px-6 md:px-8 pt-6">
+                <h2 className="text-lg sm:text-xl md:text-2xl font-bold">Event Details</h2>
               </CardHeader>
-              <CardBody className="pt-4">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="flex items-start gap-3">
-                    <div className="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0">
-                      <CalendarIcon className="w-6 h-6 text-purple-600" />
+              <CardBody className="pt-4 px-4 sm:px-6 md:px-8 pb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5 lg:gap-6">
+                  <div className="flex items-start gap-2 sm:gap-3">
+                    <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0">
+                      <CalendarIcon className="w-5 sm:w-6 h-5 sm:h-6 text-purple-600" />
                     </div>
-                    <div>
-                      <p className="text-sm text-default-500 mb-1">Date</p>
-                      <p className="font-semibold">{formatDate(event.date)}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3">
-                    <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
-                      <ClockIcon className="w-6 h-6 text-blue-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-default-500 mb-1">Time</p>
-                      <p className="font-semibold">{event.time}</p>
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-small text-default-500 mb-0.5">Date</p>
+                      <p className="text-xs sm:text-small md:text-base font-semibold">{formatDate(event.date)}</p>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-3">
-                    <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
-                      <BuildingIcon className="w-6 h-6 text-green-600" />
+                  <div className="flex items-start gap-2 sm:gap-3">
+                    <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
+                      <ClockIcon className="w-5 sm:w-6 h-5 sm:h-6 text-blue-600" />
                     </div>
-                    <div>
-                      <p className="text-sm text-default-500 mb-1">Venue</p>
-                      <p className="font-semibold">{event.venue}</p>
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-small text-default-500 mb-0.5">Time</p>
+                      <p className="text-xs sm:text-small md:text-base font-semibold">{event.time}</p>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-3">
-                    <div className="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0">
-                      <MapPinIcon className="w-6 h-6 text-orange-600" />
+                  <div className="flex items-start gap-2 sm:gap-3">
+                    <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
+                      <BuildingIcon className="w-5 sm:w-6 h-5 sm:h-6 text-green-600" />
                     </div>
-                    <div>
-                      <p className="text-sm text-default-500 mb-1">Location</p>
-                      <p className="font-semibold">{event.location}</p>
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-small text-default-500 mb-0.5">Venue</p>
+                      <p className="text-xs sm:text-small md:text-base font-semibold line-clamp-2">{event.venue}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2 sm:gap-3">
+                    <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0">
+                      <MapPinIcon className="w-5 sm:w-6 h-5 sm:h-6 text-orange-600" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-small text-default-500 mb-0.5">Location</p>
+                      <p className="text-xs sm:text-small md:text-base font-semibold line-clamp-2">{event.location}</p>
                     </div>
                   </div>
                 </div>
@@ -409,21 +412,21 @@ export default function EventDetailPage() {
             {/* Tags */}
             {event.tags.length > 0 && (
               <Card className="border-none shadow-lg">
-                <CardHeader className="pb-0">
+                <CardHeader className="pb-0 px-4 sm:px-6 md:px-8 pt-6">
                   <div className="flex items-center gap-2">
-                    <TagIcon className="w-5 h-5 text-purple-600" />
-                    <h2 className="text-2xl font-bold">Topics</h2>
+                    <TagIcon className="w-4 sm:w-5 h-4 sm:h-5 text-purple-600 flex-shrink-0" />
+                    <h2 className="text-lg sm:text-xl md:text-2xl font-bold">Topics</h2>
                   </div>
                 </CardHeader>
-                <CardBody className="pt-4">
-                  <div className="flex flex-wrap gap-2">
+                <CardBody className="pt-4 px-4 sm:px-6 md:px-8 pb-6">
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2 md:gap-3">
                     {event.tags.map((tag, index) => (
                       <Chip 
                         key={index} 
-                        size="lg" 
+                        size="sm"
                         variant="flat" 
                         color="secondary"
-                        className="font-medium"
+                        className="font-medium text-[10px] sm:text-xs md:text-small"
                       >
                         {tag}
                       </Chip>
@@ -435,20 +438,20 @@ export default function EventDetailPage() {
 
             {/* Organizer */}
             <Card className="border-none shadow-lg">
-              <CardHeader className="pb-0">
-                <h2 className="text-2xl font-bold">Organized By</h2>
+              <CardHeader className="pb-0 px-4 sm:px-6 md:px-8 pt-6">
+                <h2 className="text-lg sm:text-xl md:text-2xl font-bold">Organized By</h2>
               </CardHeader>
-              <CardBody className="pt-4">
-                <div className="flex items-center gap-4">
+              <CardBody className="pt-4 px-4 sm:px-6 md:px-8 pb-6">
+                <div className="flex items-center gap-3 sm:gap-4">
                   <Avatar
                     src={event.organizerAvatar}
                     name={event.organizerName}
                     size="lg"
-                    className="w-16 h-16"
+                    className="w-12 sm:w-16 h-12 sm:h-16"
                   />
-                  <div>
-                    <p className="font-bold text-lg">{event.organizerName}</p>
-                    <p className="text-default-500">Event Organizer</p>
+                  <div className="min-w-0">
+                    <p className="font-bold text-sm sm:text-base md:text-lg line-clamp-1">{event.organizerName}</p>
+                    <p className="text-xs sm:text-small text-default-500">Event Organizer</p>
                   </div>
                 </div>
               </CardBody>
@@ -458,27 +461,27 @@ export default function EventDetailPage() {
           {/* Right Column - Registration Card */}
           <div className="lg:col-span-1">
             <Card className="border-none shadow-2xl sticky top-6 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20">
-              <CardBody className="p-6 space-y-6">
+              <CardBody className="p-4 sm:p-6 space-y-4 sm:space-y-5 md:space-y-6">
                 {/* Price */}
                 <div>
-                  <div className="flex items-baseline gap-3 mb-2">
+                  <div className="flex items-baseline gap-2 sm:gap-3 mb-2">
                     {event.discountPrice && event.discountPrice < event.price ? (
                       <>
-                        <span className="text-4xl font-bold text-foreground">
+                        <span className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground">
                           ${event.discountPrice}
                         </span>
-                        <span className="text-2xl text-default-400 line-through">
+                        <span className="text-xl sm:text-2xl text-default-400 line-through">
                           ${event.price}
                         </span>
                       </>
                     ) : (
-                      <span className="text-4xl font-bold text-foreground">
+                      <span className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground">
                         ${event.price}
                       </span>
                     )}
                   </div>
                   {event.discountPrice && event.discountPrice < event.price && (
-                    <Badge color="success" variant="flat" size="lg">
+                    <Badge color="success" variant="flat" size="sm" className="text-[10px] sm:text-xs md:text-small">
                       Save ${event.price - event.discountPrice} ({calculateDiscount(event.price, event.discountPrice)}% OFF)
                     </Badge>
                   )}
@@ -487,13 +490,13 @@ export default function EventDetailPage() {
                 <Divider />
 
                 {/* Registration Stats */}
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <UsersIcon className="w-5 h-5 text-default-500" />
-                      <span className="text-default-600">Registered</span>
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <UsersIcon className="w-4 sm:w-5 h-4 sm:h-5 text-default-500 flex-shrink-0" />
+                      <span className="text-xs sm:text-small md:text-base text-default-600">Registered</span>
                     </div>
-                    <span className="font-bold text-lg">
+                    <span className="font-bold text-sm sm:text-base md:text-lg">
                       {event.registered}{event.capacity && `/${event.capacity}`}
                     </span>
                   </div>
@@ -507,9 +510,9 @@ export default function EventDetailPage() {
                           getRegistrationPercentage() > 90 ? "danger" : 
                           getRegistrationPercentage() > 70 ? "warning" : "primary"
                         }
-                        className="mt-2"
+                        className="mt-1.5 sm:mt-2"
                       />
-                      <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center justify-between text-xs sm:text-small">
                         <span className="text-default-500">
                           {getSpotsLeft()} spots remaining
                         </span>
@@ -527,44 +530,44 @@ export default function EventDetailPage() {
                 <Divider />
 
                 {/* Registration Button */}
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   <Button
                     color={isRegistered ? "default" : "primary"}
                     variant={isRegistered ? "flat" : "solid"}
                     size="lg"
-                    className="w-full font-bold text-lg"
+                    className="w-full font-bold text-xs sm:text-small md:text-base"
                     isLoading={registering}
                     onPress={handleRegister}
                     startContent={
                       isRegistered ? 
-                      <CheckCircleIcon className="w-5 h-5" /> : 
-                      <TicketIcon className="w-5 h-5" />
+                      <CheckCircleIcon className="w-3.5 sm:w-4 md:w-5 h-3.5 sm:h-4 md:h-5" /> : 
+                      <TicketIcon className="w-3.5 sm:w-4 md:w-5 h-3.5 sm:h-4 md:h-5" />
                     }
                   >
                     {registering ? "Registering..." : isRegistered ? "You're Registered!" : "Register Now"}
                   </Button>
 
                   {isRegistered && (
-                    <div className="p-4 bg-success-50 dark:bg-success-900/20 rounded-xl border border-success-200 dark:border-success-800">
+                    <div className="p-3 sm:p-4 bg-success-50 dark:bg-success-900/20 rounded-lg sm:rounded-xl border border-success-200 dark:border-success-800">
                       <div className="flex items-start gap-2">
-                        <CheckCircleIcon className="w-5 h-5 text-success flex-shrink-0 mt-0.5" />
-                        <div className="flex-1">
-                          <p className="font-semibold text-success text-sm">
+                        <CheckCircleIcon className="w-4 sm:w-5 h-4 sm:h-5 text-success flex-shrink-0 mt-0.5" />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-xs sm:text-small md:text-base text-success">
                             Registration Confirmed!
                           </p>
                           {emailSent && ticketId && (
                             <>
-                              <p className="text-xs text-success-700 dark:text-success-300 mt-1">
+                              <p className="text-[10px] sm:text-xs md:text-small text-success-700 dark:text-success-300 mt-1">
                                 <MailIcon className="w-3 h-3 inline mr-1" />
                                 E-ticket sent to your email
                               </p>
-                              <p className="text-xs text-success-700 dark:text-success-300 mt-1 font-mono bg-success-100 dark:bg-success-900/30 p-2 rounded">
+                              <p className="text-[10px] sm:text-xs md:text-small text-success-700 dark:text-success-300 mt-1 font-mono bg-success-100 dark:bg-success-900/30 p-1.5 sm:p-2 rounded break-all">
                                 🎫 {ticketId}
                               </p>
                             </>
                           )}
                           {isRegistered && !emailSent && (
-                            <p className="text-xs text-success-700 dark:text-success-300 mt-1">
+                            <p className="text-[10px] sm:text-xs md:text-small text-success-700 dark:text-success-300 mt-1">
                               Check your email for event details
                             </p>
                           )}
@@ -574,10 +577,10 @@ export default function EventDetailPage() {
                   )}
 
                   {!isRegistered && getSpotsLeft() !== null && getSpotsLeft()! < 10 && (
-                    <div className="p-4 bg-warning-50 dark:bg-warning-900/20 rounded-xl border border-warning-200 dark:border-warning-800">
+                    <div className="p-3 sm:p-4 bg-warning-50 dark:bg-warning-900/20 rounded-lg sm:rounded-xl border border-warning-200 dark:border-warning-800">
                       <div className="flex items-start gap-2">
-                        <TrendingUpIcon className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
-                        <p className="text-sm text-warning-700 dark:text-warning-300">
+                        <TrendingUpIcon className="w-4 sm:w-5 h-4 sm:h-5 text-warning flex-shrink-0 mt-0.5" />
+                        <p className="text-[10px] sm:text-xs md:text-small text-warning-700 dark:text-warning-300">
                           <span className="font-semibold">Filling fast!</span> Only {getSpotsLeft()} spots left
                         </p>
                       </div>
@@ -588,23 +591,23 @@ export default function EventDetailPage() {
                 <Divider />
 
                 {/* Features */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 text-sm">
-                    <CheckCircleIcon className="w-5 h-5 text-success" />
-                    <span>Instant confirmation</span>
+                <div className="space-y-2 sm:space-y-3 md:space-y-4">
+                  <div className="flex items-start gap-2 sm:gap-3">
+                    <CheckCircleIcon className="w-4 sm:w-5 h-4 sm:h-5 text-success flex-shrink-0 mt-0.5" />
+                    <span className="text-xs sm:text-small md:text-base">Instant confirmation</span>
                   </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <CheckCircleIcon className="w-5 h-5 text-success" />
-                    <span>E-ticket included</span>
+                  <div className="flex items-start gap-2 sm:gap-3">
+                    <CheckCircleIcon className="w-4 sm:w-5 h-4 sm:h-5 text-success flex-shrink-0 mt-0.5" />
+                    <span className="text-xs sm:text-small md:text-base">E-ticket included</span>
                   </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <CheckCircleIcon className="w-5 h-5 text-success" />
-                    <span>Certificate of attendance</span>
+                  <div className="flex items-start gap-2 sm:gap-3">
+                    <CheckCircleIcon className="w-4 sm:w-5 h-4 sm:h-5 text-success flex-shrink-0 mt-0.5" />
+                    <span className="text-xs sm:text-small md:text-base">Certificate of attendance</span>
                   </div>
                   {event.isPremium && (
-                    <div className="flex items-center gap-3 text-sm">
-                      <CrownIcon className="w-5 h-5 text-purple-600" />
-                      <span className="font-semibold text-purple-600">Premium perks included</span>
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <CrownIcon className="w-4 sm:w-5 h-4 sm:h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+                      <span className="text-xs sm:text-small md:text-base font-semibold text-purple-600">Premium perks included</span>
                     </div>
                   )}
                 </div>

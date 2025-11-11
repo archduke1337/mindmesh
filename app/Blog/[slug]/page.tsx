@@ -106,15 +106,16 @@ export default function BlogPostPage() {
   }
 
   return (
-    <div className="min-h-screen pb-12 md:pb-20">
+    <div className="min-h-screen pb-12 sm:pb-16 md:pb-20 lg:pb-24">
       {/* Back Button */}
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-4 md:py-6">
+      <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-5 md:py-6 lg:py-8">
         <div className="max-w-4xl mx-auto">
           <Button
             variant="light"
-            startContent={<ArrowLeftIcon className="w-4 h-4" />}
+            startContent={<ArrowLeftIcon className="w-3.5 sm:w-4 md:w-5 h-3.5 sm:h-4 md:h-5" />}
             onPress={() => router.push("/blog")}
             size="lg"
+            className="text-xs sm:text-small md:text-base"
           >
             Back to Blogs
           </Button>
@@ -122,7 +123,7 @@ export default function BlogPostPage() {
       </div>
 
       {/* Hero Section */}
-      <div className="relative h-64 sm:h-80 md:h-96 lg:h-[400px] mb-8 md:mb-12 w-full">
+      <div className="relative h-48 sm:h-64 md:h-80 lg:h-96 mb-6 sm:mb-8 md:mb-10 lg:mb-12 w-full overflow-hidden">
         <img
           src={blog.coverImage}
           alt={blog.title}
@@ -131,60 +132,62 @@ export default function BlogPostPage() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
 
         {/* Title Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 md:p-8">
-          <div className="w-full px-4 sm:px-6 lg:px-8">
+        <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 md:p-6 lg:p-8">
+          <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
-              <Chip color="primary" variant="solid" className="mb-3 md:mb-4">
+              <Chip color="primary" variant="solid" className="mb-2 sm:mb-3 md:mb-4 text-[10px] sm:text-xs md:text-small">
                 {blog.category}
               </Chip>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 md:mb-4">
+              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-white mb-1.5 sm:mb-2 md:mb-3">
                 {blog.title}
               </h1>
-              <p className="text-sm sm:text-base md:text-lg text-white/90">{blog.excerpt}</p>
+              <p className="text-xs sm:text-small md:text-base text-white/90 line-clamp-2">{blog.excerpt}</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Content Container */}
-      <div className="w-full px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           {/* Meta Info */}
-          <Card className="mb-6 md:mb-8">
-            <CardBody className="p-4 sm:p-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <Card className="mb-6 sm:mb-7 md:mb-8 lg:mb-10">
+            <CardBody className="p-3 sm:p-4 md:p-6 lg:p-8">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 md:gap-6">
                 {/* Author */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
                   <Avatar
                     src={blog.authorAvatar}
                     name={blog.authorName}
                     size="lg"
+                    className="w-10 sm:w-12 h-10 sm:h-12"
                   />
-                  <div>
-                    <p className="font-semibold text-sm md:text-base">{blog.authorName}</p>
-                    <p className="text-xs md:text-small text-default-500">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-xs sm:text-small md:text-base truncate">{blog.authorName}</p>
+                    <p className="text-[10px] sm:text-xs md:text-small text-default-500 truncate">
                       {blog.publishedAt && formatDate(blog.publishedAt)}
                     </p>
                   </div>
                 </div>
 
                 {/* Stats */}
-                <div className="flex items-center gap-3 md:gap-6 text-xs md:text-small text-default-600">
+                <div className="flex items-center gap-2 sm:gap-3 md:gap-4 lg:gap-6 text-[10px] sm:text-xs md:text-small text-default-600 flex-wrap">
                   <div className="flex items-center gap-1">
-                    <ClockIcon className="w-4 h-4" />
-                    <span>{blog.readTime} min read</span>
+                    <ClockIcon className="w-3.5 sm:w-4 md:w-5 h-3.5 sm:h-4 md:h-5 flex-shrink-0" />
+                    <span className="whitespace-nowrap">{blog.readTime} min</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <EyeIcon className="w-4 h-4" />
-                    <span>{blog.views} views</span>
+                    <EyeIcon className="w-3.5 sm:w-4 md:w-5 h-3.5 sm:h-4 md:h-5 flex-shrink-0" />
+                    <span className="whitespace-nowrap">{blog.views} views</span>
                   </div>
                   <Button
                     size="sm"
                     variant="flat"
                     isIconOnly
                     onPress={handleShare}
+                    className="min-w-fit"
                   >
-                    <ShareIcon className="w-4 h-4" />
+                    <ShareIcon className="w-3.5 sm:w-4 md:w-5 h-3.5 sm:h-4 md:h-5" />
                   </Button>
                 </div>
               </div>
@@ -192,22 +195,22 @@ export default function BlogPostPage() {
           </Card>
 
           {/* Blog Content */}
-          <Card className="mb-6 md:mb-8">
+          <Card className="mb-6 sm:mb-7 md:mb-8 lg:mb-10">
             <CardBody className="p-4 sm:p-6 md:p-8 lg:p-12">
-              <div className="prose prose-sm md:prose-base lg:prose-lg dark:prose-invert max-w-none">
+              <div className="prose prose-sm md:prose-base dark:prose-invert max-w-none">
                 {/* Simple content rendering - for Markdown, use a library like react-markdown */}
-                <div className="whitespace-pre-wrap text-sm md:text-base leading-relaxed">{blog.content}</div>
+                <div className="whitespace-pre-wrap text-xs sm:text-small md:text-base lg:text-lg leading-relaxed">{blog.content}</div>
               </div>
             </CardBody>
           </Card>
 
           {/* Tags */}
-          <Card className="mb-6 md:mb-8">
-            <CardBody className="p-4 sm:p-6">
-              <h3 className="font-semibold mb-3 md:mb-4 text-sm md:text-base">Tags</h3>
-              <div className="flex flex-wrap gap-2">
+          <Card className="mb-6 sm:mb-7 md:mb-8 lg:mb-10">
+            <CardBody className="p-4 sm:p-6 md:p-8">
+              <h3 className="font-semibold mb-2 sm:mb-3 md:mb-4 text-xs sm:text-small md:text-base">Tags</h3>
+              <div className="flex flex-wrap gap-1.5 sm:gap-2 md:gap-3">
                 {blog.tags.map((tag, index) => (
-                  <Chip key={index} variant="flat" color="primary" size="sm">
+                  <Chip key={index} variant="flat" color="primary" size="sm" className="text-[10px] sm:text-xs md:text-small">
                     #{tag}
                   </Chip>
                 ))}
@@ -217,9 +220,9 @@ export default function BlogPostPage() {
 
           {/* Related Blogs */}
           {relatedBlogs.length > 0 && (
-            <div className="mt-8 md:mt-12">
-              <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">Related Articles</h2>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            <div className="mt-8 sm:mt-10 md:mt-12 lg:mt-16">
+              <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold mb-4 sm:mb-5 md:mb-6 lg:mb-8">Related Articles</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
                 {relatedBlogs.map((relatedBlog) => (
                   <Card
                     key={relatedBlog.$id}
@@ -231,13 +234,13 @@ export default function BlogPostPage() {
                       <img
                         src={relatedBlog.coverImage}
                         alt={relatedBlog.title}
-                        className="w-full h-28 sm:h-32 object-cover"
+                        className="w-full h-28 sm:h-32 md:h-40 object-cover"
                       />
-                      <div className="p-3 sm:p-4">
-                        <h3 className="font-bold text-sm md:text-base line-clamp-2 mb-2">
+                      <div className="p-3 sm:p-4 md:p-5">
+                        <h3 className="font-bold text-xs sm:text-small md:text-base line-clamp-2 mb-1.5 sm:mb-2">
                           {relatedBlog.title}
                         </h3>
-                        <p className="text-xs md:text-small text-default-600 line-clamp-2">
+                        <p className="text-[10px] sm:text-xs md:text-small text-default-600 line-clamp-2">
                           {relatedBlog.excerpt}
                         </p>
                       </div>

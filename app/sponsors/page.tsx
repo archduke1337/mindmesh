@@ -48,17 +48,17 @@ export default function SponsorsPage() {
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-pink-500/20 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-12 space-y-16">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-8 sm:py-10 md:py-12 lg:py-16 space-y-12 sm:space-y-14 md:space-y-16 lg:space-y-20">
         {/* Hero */}
         
-        <div className="text-center space-y-4 max-w-3xl mx-auto">
+        <div className="text-center space-y-2 sm:space-y-3 md:space-y-4 max-w-3xl mx-auto">
           
           
           <h1 className={title({ size: "lg" })}>
             Our <span className={title({ color: "violet", size: "lg" })}>Amazing Sponsors</span>
           </h1>
           
-          <p className="text-default-600 text-lg">
+          <p className="text-xs sm:text-small md:text-base lg:text-lg text-default-600">
             Thank you to these incredible organizations for supporting our community
           </p>
         </div>
@@ -66,25 +66,26 @@ export default function SponsorsPage() {
         {/* Sponsors Grid */}
         {sponsors.length === 0 ? (
           <Card className="max-w-2xl mx-auto" shadow="sm">
-            <CardBody className="text-center py-16 space-y-4">
-              <div className="w-16 h-16 rounded-full bg-default-100 flex items-center justify-center mx-auto">
-                <UsersIcon className="w-8 h-8 text-default-400" />
+            <CardBody className="text-center py-12 sm:py-16 md:py-20 space-y-3 sm:space-y-4 md:space-y-5 px-4 sm:px-6 md:px-8">
+              <div className="w-14 sm:w-16 md:w-20 h-14 sm:h-16 md:h-20 rounded-full bg-default-100 flex items-center justify-center mx-auto">
+                <UsersIcon className="w-7 sm:w-8 md:w-10 h-7 sm:h-8 md:h-10 text-default-400" />
               </div>
-              <h3 className="text-xl font-semibold">No Sponsors Yet</h3>
-              <p className="text-default-500">Be the first to support our community</p>
+              <h3 className="text-lg sm:text-xl md:text-2xl font-semibold">No Sponsors Yet</h3>
+              <p className="text-xs sm:text-small md:text-base text-default-500">Be the first to support our community</p>
               <Button
                 as="a"
                 href="mailto:sponsors@mindmesh.club"
                 color="primary"
                 variant="shadow"
-                endContent={<MailIcon className="w-4 h-4" />}
+                size="lg"
+                endContent={<MailIcon className="w-3.5 sm:w-4 md:w-5 h-3.5 sm:h-4 md:h-5" />}
               >
                 Become a Sponsor
               </Button>
             </CardBody>
           </Card>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-3 md:gap-4 lg:gap-5">
             {sponsors.map((sponsor, index) => {
               const tierInfo = sponsorTiers[sponsor.tier as keyof typeof sponsorTiers];
               
@@ -144,44 +145,44 @@ export default function SponsorsPage() {
           </div>
         )}
 
-        <Divider className="my-12" />
+        <Divider className="my-8 sm:my-10 md:my-12 lg:my-16" />
 
         {/* CTA */}
         <Card className="max-w-4xl mx-auto bg-gradient-to-br from-purple-500/10 to-pink-500/10" shadow="lg">
-          <CardBody className="p-8 md:p-12 text-center space-y-6">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mx-auto">
-              <AwardIcon className="w-10 h-10 text-white" />
+          <CardBody className="p-6 sm:p-8 md:p-12 lg:p-16 text-center space-y-5 sm:space-y-6 md:space-y-8">
+            <div className="w-16 sm:w-20 md:w-24 h-16 sm:h-20 md:h-24 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mx-auto">
+              <AwardIcon className="w-8 sm:w-10 md:w-12 h-8 sm:h-10 md:h-12 text-white" />
             </div>
             
-            <div className="space-y-3">
-              <h2 className="text-3xl font-bold">Interested in Sponsoring?</h2>
-              <p className="text-default-600 max-w-2xl mx-auto">
+            <div className="space-y-2 sm:space-y-3 md:space-y-4">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold">Interested in Sponsoring?</h2>
+              <p className="text-xs sm:text-small md:text-base lg:text-lg text-default-600 max-w-2xl mx-auto">
                 Partner with MIND Mesh to support our community and connect with top talent
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-4 pt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 md:gap-6 pt-2 md:pt-4">
               <Card shadow="none" className="bg-white/50 dark:bg-default-100/50">
-                <CardBody className="p-4 text-center space-y-2">
-                  <TrendingUpIcon className="w-6 h-6 text-purple-500 mx-auto" />
-                  <p className="text-sm font-semibold">Brand Visibility</p>
-                  <p className="text-xs text-default-500">Reach 500+ students</p>
+                <CardBody className="p-4 md:p-6 text-center space-y-2 md:space-y-3">
+                  <TrendingUpIcon className="w-5 sm:w-6 md:w-8 h-5 sm:h-6 md:h-8 text-purple-500 mx-auto" />
+                  <p className="text-xs sm:text-small md:text-base font-semibold">Brand Visibility</p>
+                  <p className="text-[10px] sm:text-xs md:text-small text-default-500">Reach 500+ students</p>
                 </CardBody>
               </Card>
 
               <Card shadow="none" className="bg-white/50 dark:bg-default-100/50">
-                <CardBody className="p-4 text-center space-y-2">
-                  <UsersIcon className="w-6 h-6 text-pink-500 mx-auto" />
-                  <p className="text-sm font-semibold">Talent Pipeline</p>
-                  <p className="text-xs text-default-500">Connect with top talent</p>
+                <CardBody className="p-4 md:p-6 text-center space-y-2 md:space-y-3">
+                  <UsersIcon className="w-5 sm:w-6 md:w-8 h-5 sm:h-6 md:h-8 text-pink-500 mx-auto" />
+                  <p className="text-xs sm:text-small md:text-base font-semibold">Talent Pipeline</p>
+                  <p className="text-[10px] sm:text-xs md:text-small text-default-500">Connect with top talent</p>
                 </CardBody>
               </Card>
 
               <Card shadow="none" className="bg-white/50 dark:bg-default-100/50">
-                <CardBody className="p-4 text-center space-y-2">
-                  <AwardIcon className="w-6 h-6 text-blue-500 mx-auto" />
-                  <p className="text-sm font-semibold">Community Impact</p>
-                  <p className="text-xs text-default-500">Support education</p>
+                <CardBody className="p-4 md:p-6 text-center space-y-2 md:space-y-3">
+                  <AwardIcon className="w-5 sm:w-6 md:w-8 h-5 sm:h-6 md:h-8 text-blue-500 mx-auto" />
+                  <p className="text-xs sm:text-small md:text-base font-semibold">Community Impact</p>
+                  <p className="text-[10px] sm:text-xs md:text-small text-default-500">Support education</p>
                 </CardBody>
               </Card>
             </div>
@@ -192,8 +193,8 @@ export default function SponsorsPage() {
               color="primary"
               size="lg"
               variant="shadow"
-              endContent={<ArrowRightIcon className="w-4 h-4" />}
-              className="font-semibold"
+              endContent={<ArrowRightIcon className="w-3.5 sm:w-4 md:w-5 h-3.5 sm:h-4 md:h-5" />}
+              className="font-semibold mt-2 md:mt-4"
             >
               Become a Sponsor
             </Button>
