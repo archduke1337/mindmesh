@@ -8,6 +8,7 @@ import { Input } from "@heroui/input";
 import { Chip } from "@heroui/chip";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import NextLink from "next/link";
 import { account, storage, ID, APPWRITE_CONFIG } from "@/lib/appwrite";
 
 // Profile pictures bucket ID
@@ -237,6 +238,38 @@ export default function ProfilePage() {
         </CardHeader>
 
         <CardBody className="gap-6 px-4 md:px-8 pb-8">
+          {/* Quick Actions */}
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+            <Button
+              as={NextLink}
+              href="/tickets"
+              variant="flat"
+              color="primary"
+              className="text-xs md:text-small"
+              size="lg"
+            >
+              📋 My Tickets
+            </Button>
+            <Button
+              as={NextLink}
+              href="/events"
+              variant="flat"
+              className="text-xs md:text-small"
+              size="lg"
+            >
+              🎫 Browse Events
+            </Button>
+            <Button
+              as={NextLink}
+              href="/settings"
+              variant="flat"
+              className="text-xs md:text-small"
+              size="lg"
+            >
+              ⚙️ Settings
+            </Button>
+          </div>
+
           {/* Show upload status */}
           {updateError && (
             <div className={`p-3 md:p-4 rounded-lg text-xs md:text-small font-medium ${

@@ -51,6 +51,10 @@ export const siteConfig = {
       href: "/profile",
     },
     {
+      label: "My Tickets",
+      href: "/tickets",
+    },
+    {
       label: "Dashboard",
       href: "/dashboard",
     },
