@@ -280,14 +280,14 @@ export default function EventsPage() {
   }
 
   return (
-    <div className="space-y-12 pb-20">
+    <div className="space-y-8 sm:space-y-10 md:space-y-12 pb-12 sm:pb-16 md:pb-20">
       {/* Hero Section */}
-      <div className="text-center space-y-6 relative py-12">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute top-20 right-1/4 w-96 h-96 bg-pink-500/20 rounded-full blur-3xl animate-pulse" />
-        <div className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 mb-6">
-          <SparklesIcon className="w-5 h-5 text-purple-500" />
-          <span className="text-sm font-semibold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+      <div className="text-center space-y-4 sm:space-y-5 md:space-y-6 relative py-8 sm:py-10 md:py-12 px-3 sm:px-4 md:px-6">
+        <div className="absolute top-0 left-1/4 w-64 sm:w-80 md:w-96 h-64 sm:h-80 md:h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-12 sm:top-16 md:top-20 right-1/4 w-64 sm:w-80 md:w-96 h-64 sm:h-80 md:h-96 bg-pink-500/20 rounded-full blur-3xl animate-pulse" />
+        <div className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 mb-4 sm:mb-5 md:mb-6">
+          <SparklesIcon className="w-4 sm:w-4.5 md:w-5 h-4 sm:h-4.5 md:h-5 text-purple-500" />
+          <span className="text-xs sm:text-sm font-semibold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
             Upcoming Events
           </span>
         </div>
@@ -298,35 +298,43 @@ export default function EventsPage() {
               Amazing Events
             </span>
           </h1>
-          <p className={subtitle({ class: "mt-6 max-w-3xl mx-auto text-xl" })}>
+          <p className={subtitle({ class: "mt-4 sm:mt-5 md:mt-6 max-w-3xl mx-auto text-base sm:text-lg md:text-xl" })}>
             Join our community events, workshops, and conferences to learn, network, and grow together
           </p>
         </div>
       </div>
 
       {/* Filters and Search */}
-      <div className="w-full px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <Card className="border-none shadow-lg bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl">
-            <CardBody className="p-4 sm:p-6">
-              <div className="flex flex-col gap-3 md:gap-4">
+            <CardBody className="p-3 sm:p-4 md:p-5 lg:p-6">
+              <div className="flex flex-col gap-2.5 sm:gap-3 md:gap-4">
                 <div className="w-full">
                   <Input
                     placeholder="Search events..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    startContent={<SearchIcon className="w-4 h-4 text-default-400" />}
+                    startContent={<SearchIcon className="w-3.5 sm:w-4 md:w-4.5 h-3.5 sm:h-4 md:h-4.5 text-default-400" />}
                     size="lg"
+                    classNames={{
+                      input: "text-xs sm:text-sm md:text-base",
+                      label: "text-xs sm:text-sm",
+                    }}
                   />
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-3 md:gap-4 w-full">
+                <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 md:gap-4 w-full">
                   <Select
                     label="Sort by"
                     selectedKeys={[sortBy]}
                     onChange={(e) => setSortBy(e.target.value)}
                     size="lg"
                     className="flex-1"
+                    classNames={{
+                      label: "text-xs sm:text-sm",
+                      value: "text-xs sm:text-sm md:text-base",
+                    }}
                   >
                     <SelectItem key="date">Date</SelectItem>
                     <SelectItem key="price">Price</SelectItem>
@@ -352,8 +360,8 @@ export default function EventsPage() {
       </div>
 
       {/* Events Grid */}
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
           {filteredEvents.map((event) => (
             <Card
               key={event.$id}
@@ -367,19 +375,19 @@ export default function EventsPage() {
                   <img
                     src={event.image}
                     alt={event.title}
-                    className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-40 sm:h-44 md:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                   />
 
-                  <div className="absolute top-4 left-4 flex flex-col gap-2">
+                  <div className="absolute top-2 sm:top-3 md:top-4 left-2 sm:left-3 md:left-4 flex flex-col gap-1.5 sm:gap-2">
                     {event.isFeatured && (
-                      <Badge color="warning" variant="solid" className="font-bold">
-                        <StarIcon className="w-3 h-3 mr-1" />
+                      <Badge color="warning" variant="solid" className="font-bold text-xs sm:text-sm">
+                        <StarIcon className="w-2.5 sm:w-3 md:w-3.5 h-2.5 sm:h-3 md:h-3.5 mr-1" />
                         Featured
                       </Badge>
                     )}
                     {event.isPremium && (
-                      <Badge color="secondary" variant="solid" className="font-bold">
-                        <CrownIcon className="w-3 h-3 mr-1" />
+                      <Badge color="secondary" variant="solid" className="font-bold text-xs sm:text-sm">
+                        <CrownIcon className="w-2.5 sm:w-3 md:w-3.5 h-2.5 sm:h-3 md:h-3.5 mr-1" />
                         Premium
                       </Badge>
                     )}
@@ -388,12 +396,12 @@ export default function EventsPage() {
                   <Button
                     isIconOnly
                     variant="flat"
-                    className="absolute top-4 right-4 bg-white/90 dark:bg-black/90 backdrop-blur-sm"
+                    className="absolute top-2 sm:top-3 md:top-4 right-2 sm:right-3 md:right-4 bg-white/90 dark:bg-black/90 backdrop-blur-sm"
                     size="sm"
                     onPress={(e) => toggleSaveEvent(e as any, event.$id!)}
                   >
                     <HeartIcon 
-                      className={`w-4 h-4 ${
+                      className={`w-3 sm:w-3.5 md:w-4 h-3 sm:h-3.5 md:h-4 ${
                         savedEvents.includes(event.$id!) 
                           ? "fill-red-500 text-red-500" 
                           : "text-gray-600"
@@ -402,42 +410,42 @@ export default function EventsPage() {
                   </Button>
 
                   {event.discountPrice && event.discountPrice < event.price && (
-                    <div className="absolute bottom-4 left-4">
-                      <Badge color="danger" variant="solid">
+                    <div className="absolute bottom-2 sm:bottom-3 md:bottom-4 left-2 sm:left-3 md:left-4">
+                      <Badge color="danger" variant="solid" className="text-xs sm:text-sm">
                         {calculateDiscount(event.price, event.discountPrice)}% OFF
                       </Badge>
                     </div>
                   )}
                 </div>
 
-                <div className="p-6 space-y-4">
+                <div className="p-3 sm:p-4 md:p-5 lg:p-6 space-y-2 sm:space-y-2.5 md:space-y-3 lg:space-y-4">
                   <div className="flex items-start justify-between">
-                    <h3 className="font-bold text-xl line-clamp-2 group-hover:text-primary transition-colors">
+                    <h3 className="font-bold text-sm sm:text-base md:text-lg line-clamp-2 group-hover:text-primary transition-colors">
                       {event.title}
                     </h3>
                   </div>
 
-                  <p className="text-default-600 line-clamp-2">
+                  <p className="text-default-600 line-clamp-2 text-xs sm:text-sm md:text-base">
                     {event.description}
                   </p>
 
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-sm text-default-500">
-                      <CalendarIcon className="w-4 h-4" />
-                      <span>{formatDate(event.date)}</span>
+                  <div className="space-y-2 sm:space-y-2.5 md:space-y-3">
+                    <div className="flex items-center gap-2 text-xs sm:text-sm text-default-500">
+                      <CalendarIcon className="w-3 sm:w-3.5 md:w-4 h-3 sm:h-3.5 md:h-4 flex-shrink-0" />
+                      <span className="truncate">{formatDate(event.date)}</span>
                     </div>
 
-                    <div className="flex items-center gap-2 text-sm text-default-500">
-                      <MapPinIcon className="w-4 h-4" />
-                      <span>{event.location}</span>
+                    <div className="flex items-center gap-2 text-xs sm:text-sm text-default-500">
+                      <MapPinIcon className="w-3 sm:w-3.5 md:w-4 h-3 sm:h-3.5 md:h-4 flex-shrink-0" />
+                      <span className="truncate">{event.location}</span>
                     </div>
 
-                    <div className="flex items-center gap-2 text-sm text-default-500">
-                      <UsersIcon className="w-4 h-4" />
-                      <span>{event.registered} registered</span>
+                    <div className="flex items-center gap-2 text-xs sm:text-sm text-default-500">
+                      <UsersIcon className="w-3 sm:w-3.5 md:w-4 h-3 sm:h-3.5 md:h-4 flex-shrink-0" />
+                      <span className="truncate">{event.registered} registered</span>
                       {event.capacity && (
-                        <span className="text-xs text-default-400">
-                          • {event.capacity - event.registered} spots left
+                        <span className="text-xs text-default-400 whitespace-nowrap">
+                          • {event.capacity - event.registered} left
                         </span>
                       )}
                     </div>
@@ -452,14 +460,14 @@ export default function EventsPage() {
                     />
                   )}
 
-                  <div className="flex flex-wrap gap-2 pt-2">
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2 pt-2 sm:pt-2.5 md:pt-3">
                     {event.tags.slice(0, 3).map((tag, index) => (
-                      <Chip key={index} size="sm" variant="flat" color="primary">
+                      <Chip key={index} size="sm" variant="flat" color="primary" className="text-xs sm:text-sm">
                         {tag}
                       </Chip>
                     ))}
                     {event.tags.length > 3 && (
-                      <Chip size="sm" variant="flat">
+                      <Chip size="sm" variant="flat" className="text-xs sm:text-sm">
                         +{event.tags.length - 3}
                       </Chip>
                     )}
@@ -467,35 +475,35 @@ export default function EventsPage() {
                 </div>
               </CardBody>
 
-              <CardFooter className="px-6 pb-6 pt-0">
-                <div className="flex items-center justify-between w-full">
-                  <div className="flex items-center gap-2">
+              <CardFooter className="px-3 sm:px-4 md:px-5 lg:px-6 pb-3 sm:pb-4 md:pb-5 lg:pb-6 pt-0">
+                <div className="flex flex-col gap-2 sm:gap-2.5 md:gap-3 w-full">
+                  <div className="flex items-center gap-2 sm:gap-2.5">
                     {event.discountPrice && event.discountPrice < event.price ? (
                       <>
-                        <span className="text-2xl font-bold text-foreground">
+                        <span className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">
                           ${event.discountPrice}
                         </span>
-                        <span className="text-lg text-default-400 line-through">
+                        <span className="text-sm sm:text-base md:text-lg text-default-400 line-through">
                           ${event.price}
                         </span>
                       </>
                     ) : (
-                      <span className="text-2xl font-bold text-foreground">
+                      <span className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">
                         ${event.price}
                       </span>
                     )}
                   </div>
 
-                  <div className="flex gap-2 w-full">
+                  <div className="w-full">
                     {registeredEvents.includes(event.$id!) ? (
                       // User is already registered - show "Get Ticket" button
                       <Button
                         color="success"
                         variant="solid"
                         size="md"
-                        startContent={<TicketIcon className="w-4 h-4" />}
+                        startContent={<TicketIcon className="w-3 sm:w-3.5 md:w-4 h-3 sm:h-3.5 md:h-4" />}
                         onPress={() => router.push(`/tickets?eventId=${event.$id}`)}
-                        className="flex-1"
+                        className="w-full text-xs sm:text-sm md:text-base"
                       >
                         Get Ticket
                       </Button>
@@ -507,8 +515,8 @@ export default function EventsPage() {
                         size="md"
                         isLoading={registering === event.$id}
                         onPress={(e) => toggleRegisterEvent(e as any, event.$id!)}
-                        endContent={<TicketIcon className="w-4 h-4" />}
-                        className="flex-1"
+                        endContent={<TicketIcon className="w-3 sm:w-3.5 md:w-4 h-3 sm:h-3.5 md:h-4" />}
+                        className="w-full text-xs sm:text-sm md:text-base"
                       >
                         Register
                       </Button>
@@ -521,10 +529,10 @@ export default function EventsPage() {
         </div>
 
         {filteredEvents.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">🎯</div>
-            <h3 className="text-xl font-semibold mb-2">No events found</h3>
-            <p className="text-default-500">
+          <div className="text-center py-8 sm:py-10 md:py-12">
+            <div className="text-4xl sm:text-5xl md:text-6xl mb-3 sm:mb-4">🎯</div>
+            <h3 className="text-base sm:text-lg md:text-xl font-semibold mb-2">No events found</h3>
+            <p className="text-xs sm:text-sm text-default-500">
               Try adjusting your search or filter criteria
             </p>
           </div>

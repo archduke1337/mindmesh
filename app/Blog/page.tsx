@@ -105,7 +105,7 @@ export default function BlogPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen px-3 sm:px-4 md:px-6">
         <Spinner label="Loading blogs..." size="lg" />
       </div>
     );
@@ -113,14 +113,14 @@ export default function BlogPage() {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Card className="border-none bg-red-50 dark:bg-red-950/30">
-          <CardBody className="p-8 text-center">
-            <p className="text-lg text-red-600 dark:text-red-400">{error}</p>
+      <div className="flex items-center justify-center min-h-screen px-3 sm:px-4 md:px-6">
+        <Card className="border-none bg-red-50 dark:bg-red-950/30 w-full max-w-md">
+          <CardBody className="p-4 sm:p-6 md:p-8 text-center space-y-3 sm:space-y-4">
+            <p className="text-sm sm:text-base md:text-lg text-red-600 dark:text-red-400">{error}</p>
             <Button
-              className="mt-4"
               color="primary"
               onPress={() => loadBlogs()}
+              className="text-xs sm:text-sm md:text-base"
             >
               Try Again
             </Button>
@@ -131,15 +131,15 @@ export default function BlogPage() {
   }
 
   return (
-    <div className="space-y-8 md:space-y-12 pb-12 md:pb-20 px-4 sm:px-6 lg:px-8">
+    <div className="space-y-6 sm:space-y-8 md:space-y-10 lg:space-y-12 pb-10 sm:pb-12 md:pb-16 lg:pb-20 px-3 sm:px-4 md:px-6 lg:px-8">
       {/* Hero Section */}
-      <div className="text-center space-y-4 md:space-y-6 relative py-8 md:py-12">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute top-20 right-1/4 w-96 h-96 bg-pink-500/20 rounded-full blur-3xl animate-pulse" />
+      <div className="text-center space-y-3 sm:space-y-4 md:space-y-5 lg:space-y-6 relative py-6 sm:py-8 md:py-10 lg:py-12">
+        <div className="absolute top-0 left-1/4 w-64 sm:w-80 md:w-96 h-64 sm:h-80 md:h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-8 sm:top-12 md:top-16 lg:top-20 right-1/4 w-64 sm:w-80 md:w-96 h-64 sm:h-80 md:h-96 bg-pink-500/20 rounded-full blur-3xl animate-pulse" />
 
-        <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 mb-4 md:mb-6">
-          <SparklesIcon className="w-4 sm:w-5 h-4 sm:h-5 text-purple-500" />
-          <span className="text-xs sm:text-small font-semibold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+        <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 mb-2 sm:mb-3 md:mb-4 lg:mb-6">
+          <SparklesIcon className="w-3 sm:w-3.5 md:w-4 lg:w-5 h-3 sm:h-3.5 md:h-4 lg:h-5 text-purple-500" />
+          <span className="text-xs sm:text-xs md:text-sm font-semibold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
             Latest Articles
           </span>
         </div>
@@ -151,7 +151,7 @@ export default function BlogPage() {
               Blog
             </span>
           </h1>
-          <p className={subtitle({ class: "mt-4 md:mt-6 max-w-3xl mx-auto text-base md:text-xl" })}>
+          <p className={subtitle({ class: "mt-3 sm:mt-4 md:mt-5 lg:mt-6 max-w-3xl mx-auto text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl" })}>
             Insights, tutorials, and stories from our community
           </p>
         </div>
@@ -161,9 +161,9 @@ export default function BlogPage() {
           <Button
             color="primary"
             size="lg"
-            startContent={<PenIcon className="w-4 sm:w-5 h-4 sm:h-5" />}
+            startContent={<PenIcon className="w-3 sm:w-3.5 md:w-4 lg:w-5 h-3 sm:h-3.5 md:h-4 lg:h-5" />}
             onPress={() => router.push("/blog/write")}
-            className="mt-3 md:mt-4"
+            className="mt-2 sm:mt-3 md:mt-4 lg:mt-5 text-xs sm:text-sm md:text-base"
           >
             Write a Blog
           </Button>
@@ -171,46 +171,51 @@ export default function BlogPage() {
       </div>
 
       {/* Filters */}
-      <div className="w-full px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <Card className="border-none shadow-lg bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl">
-            <CardBody className="p-4 sm:p-6">
-              <div className="flex flex-col gap-3 md:gap-4">
-                <Input
-                  placeholder="Search blogs..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  startContent={<SearchIcon className="w-4 h-4" />}
-                  className="w-full"
-                  size="lg"
-                />
-                <Select
-                  label="Category"
-                  selectedKeys={[selectedCategory]}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  size="lg"
-                >
-                  <SelectItem key="all">All Categories</SelectItem>
-                  <SelectItem key="tutorial">Tutorial</SelectItem>
-                  <SelectItem key="news">News</SelectItem>
-                  <SelectItem key="event">Event</SelectItem>
-                  <SelectItem key="project">Project</SelectItem>
-                  <SelectItem key="technology">Technology</SelectItem>
-                </Select>
-              </div>
-            </CardBody>
-          </Card>
-        </div>
+      <div className="w-full max-w-7xl mx-auto">
+        <Card className="border-none shadow-lg bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl">
+          <CardBody className="p-3 sm:p-4 md:p-5 lg:p-6">
+            <div className="flex flex-col gap-2 sm:gap-2.5 md:gap-3 lg:gap-4">
+              <Input
+                placeholder="Search blogs..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                startContent={<SearchIcon className="w-3 sm:w-3.5 md:w-4 lg:w-4.5 h-3 sm:h-3.5 md:h-4 lg:h-4.5" />}
+                className="w-full"
+                size="lg"
+                classNames={{
+                  input: "text-xs sm:text-sm md:text-base",
+                }}
+              />
+              <Select
+                label="Category"
+                selectedKeys={[selectedCategory]}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                size="lg"
+                classNames={{
+                  label: "text-xs sm:text-sm",
+                  value: "text-xs sm:text-sm md:text-base",
+                }}
+              >
+                <SelectItem key="all">All Categories</SelectItem>
+                <SelectItem key="tutorial">Tutorial</SelectItem>
+                <SelectItem key="news">News</SelectItem>
+                <SelectItem key="event">Event</SelectItem>
+                <SelectItem key="project">Project</SelectItem>
+                <SelectItem key="technology">Technology</SelectItem>
+              </Select>
+            </div>
+          </CardBody>
+        </Card>
       </div>
 
       {/* Blog Grid */}
-      <div className="w-full px-4 sm:px-6 lg:px-8">
+      <div className="w-full">
         <div className="max-w-7xl mx-auto">
           {filteredBlogs.length === 0 ? (
-            <div className="text-center py-8 md:py-12">
-              <div className="text-4xl md:text-6xl mb-4">📝</div>
-              <h3 className="text-lg md:text-xl font-semibold mb-2">No blogs found</h3>
-              <p className="text-sm md:text-base text-default-500 mb-6">
+            <div className="text-center py-8 sm:py-10 md:py-12 lg:py-16">
+              <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl mb-3 sm:mb-4 md:mb-5">📝</div>
+              <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold mb-2 sm:mb-3">No blogs found</h3>
+              <p className="text-xs sm:text-sm md:text-base text-default-500 mb-4 sm:mb-5 md:mb-6">
                 {user
                   ? "Be the first to write a blog!"
                   : "Check back later for new content"}
@@ -218,16 +223,17 @@ export default function BlogPage() {
               {user && (
                 <Button
                   color="primary"
-                  startContent={<PenIcon className="w-4 h-4" />}
+                  startContent={<PenIcon className="w-3 sm:w-3.5 md:w-4 h-3 sm:h-3.5 md:h-4" />}
                   onPress={() => router.push("/blog/write")}
                   size="lg"
+                  className="text-xs sm:text-sm md:text-base"
                 >
                   Write a Blog
                 </Button>
               )}
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
               {filteredBlogs.map((blog) => (
                 <Card
                   key={blog.$id}
@@ -238,7 +244,7 @@ export default function BlogPage() {
                 >
                   <CardBody className="p-0">
                     {/* Cover Image */}
-                    <div className="relative h-40 sm:h-44 md:h-48 overflow-hidden">
+                    <div className="relative h-36 sm:h-40 md:h-44 lg:h-48 overflow-hidden">
                       <img
                         src={blog.coverImage}
                         alt={blog.title}
@@ -248,7 +254,7 @@ export default function BlogPage() {
                         <Chip
                           color="warning"
                           size="sm"
-                          className="absolute top-3 left-3"
+                          className="absolute top-2 sm:top-2.5 md:top-3 left-2 sm:left-2.5 md:left-3 text-xs"
                         >
                           Featured
                         </Chip>
@@ -256,26 +262,26 @@ export default function BlogPage() {
                       <Chip
                         size="sm"
                         variant="flat"
-                        className="absolute top-3 right-3 bg-black/50 text-white"
+                        className="absolute top-2 sm:top-2.5 md:top-3 right-2 sm:right-2.5 md:right-3 bg-black/50 text-white text-xs"
                       >
                         {blog.category.replace("-", " ")}
                       </Chip>
                     </div>
 
                     {/* Content */}
-                    <div className="p-4 md:p-6 space-y-3 md:space-y-4">
-                      <h3 className="font-bold text-base sm:text-lg line-clamp-2 group-hover:text-primary transition-colors">
+                    <div className="p-3 sm:p-4 md:p-5 lg:p-6 space-y-2 sm:space-y-2.5 md:space-y-3 lg:space-y-4">
+                      <h3 className="font-bold text-sm sm:text-base md:text-lg line-clamp-2 group-hover:text-primary transition-colors">
                         {blog.title}
                       </h3>
 
-                      <p className="text-xs sm:text-small text-default-600 line-clamp-3">
+                      <p className="text-xs sm:text-xs md:text-sm text-default-600 line-clamp-3">
                         {blog.excerpt}
                       </p>
 
                       {/* Tags */}
-                      <div className="flex flex-wrap gap-1 md:gap-2">
-                        {blog.tags.slice(0, 3).map((tag, index) => (
-                          <Chip key={index} size="sm" variant="flat">
+                      <div className="flex flex-wrap gap-1 md:gap-1.5">
+                        {blog.tags.slice(0, 2).map((tag, index) => (
+                          <Chip key={index} size="sm" variant="flat" className="text-xs">
                             #{tag}
                           </Chip>
                         ))}
@@ -283,7 +289,7 @@ export default function BlogPage() {
                     </div>
                   </CardBody>
 
-                  <CardFooter className="px-4 md:px-6 pb-4 md:pb-6 pt-0 flex-col sm:flex-row justify-between gap-3">
+                  <CardFooter className="px-3 sm:px-4 md:px-5 lg:px-6 pb-3 sm:pb-4 md:pb-5 lg:pb-6 pt-0 flex flex-col sm:flex-row justify-between gap-2 sm:gap-3 lg:gap-4">
                     {/* Author */}
                     <div className="flex items-center gap-2 min-w-0">
                       <Avatar
@@ -292,7 +298,7 @@ export default function BlogPage() {
                         size="sm"
                       />
                       <div className="flex flex-col min-w-0">
-                        <span className="text-xs sm:text-small font-medium truncate">
+                        <span className="text-xs sm:text-xs md:text-sm font-medium truncate">
                           {blog.authorName}
                         </span>
                         <span className="text-xs text-default-500">
@@ -302,14 +308,14 @@ export default function BlogPage() {
                     </div>
 
                     {/* Meta */}
-                    <div className="flex items-center gap-2 md:gap-3 text-xs md:text-small text-default-500">
-                      <div className="flex items-center gap-1 whitespace-nowrap">
-                        <ClockIcon className="w-3 h-3 md:w-4 md:h-4" />
-                        <span>{blog.readTime} min</span>
+                    <div className="flex items-center gap-1.5 sm:gap-2 md:gap-2.5 lg:gap-3 text-xs text-default-500 whitespace-nowrap">
+                      <div className="flex items-center gap-0.5 sm:gap-1">
+                        <ClockIcon className="w-2.5 sm:w-3 md:w-3.5 lg:w-4 h-2.5 sm:h-3 md:h-3.5 lg:h-4" />
+                        <span className="text-xs">{blog.readTime} min</span>
                       </div>
-                      <div className="flex items-center gap-1 whitespace-nowrap">
-                        <EyeIcon className="w-3 h-3 md:w-4 md:h-4" />
-                        <span>{blog.views}</span>
+                      <div className="flex items-center gap-0.5 sm:gap-1">
+                        <EyeIcon className="w-2.5 sm:w-3 md:w-3.5 lg:w-4 h-2.5 sm:h-3 md:h-3.5 lg:h-4" />
+                        <span className="text-xs">{blog.views}</span>
                       </div>
                     </div>
                   </CardFooter>
