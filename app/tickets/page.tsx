@@ -11,6 +11,8 @@ import { title, subtitle } from "@/components/primitives";
 import { useAuth } from "@/context/AuthContext";
 import { eventService } from "@/lib/database";
 import { getErrorMessage } from "@/lib/errorHandler";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 import {
   TicketIcon,
   CalendarIcon,
@@ -119,63 +121,136 @@ export default function TicketsPage() {
     }
   };
 
-  const handleDownloadTicket = (ticket: Ticket) => {
-    // Create a formatted text representation of the ticket
-    const dateStr = new Date(ticket.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
-    const registeredStr = new Date(ticket.registeredAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" });
-    
-    const ticketText = `╔════════════════════════════════════════════════════════════════╗
-║                    🎫 EVENT TICKET                            ║
-║                    MIND MESH COMMUNITY                        ║
-╚════════════════════════════════════════════════════════════════╝
+  const handleDownloadTicket = async (ticket: Ticket) => {
+    try {
+      // Create a temporary container for rendering
+      const tempContainer = document.createElement("div");
+      tempContainer.style.position = "absolute";
+      tempContainer.style.left = "-9999px";
+      tempContainer.style.width = "800px";
+      tempContainer.style.backgroundColor = "white";
+      tempContainer.style.padding = "40px";
+      tempContainer.style.fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
 
-┌────────────────────────────────────────────────────────────────┐
-│ TICKET INFORMATION                                             │
-└────────────────────────────────────────────────────────────────┘
+      const dateStr = new Date(ticket.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+      const registeredStr = new Date(ticket.registeredAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" });
 
-Ticket ID:    ${ticket.ticketId}
-Status:       ✓ CONFIRMED
+      tempContainer.innerHTML = `
+        <div style="max-width: 600px; margin: 0 auto;">
+          <!-- Header -->
+          <div style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); color: white; padding: 40px 30px; text-align: center; border-radius: 12px 12px 0 0;">
+            <div style="font-size: 48px; margin-bottom: 15px;">🎫</div>
+            <div style="font-size: 28px; font-weight: 700; margin-bottom: 8px; letter-spacing: 1px;">EVENT TICKET</div>
+            <div style="font-size: 14px; opacity: 0.9; font-weight: 500; letter-spacing: 2px;">MIND MESH COMMUNITY</div>
+          </div>
 
-┌────────────────────────────────────────────────────────────────┐
-│ EVENT DETAILS                                                  │
-└────────────────────────────────────────────────────────────────┘
+          <!-- Body -->
+          <div style="padding: 40px 30px; border: 1px solid #e5e7eb; border-top: none;">
+            <!-- Ticket ID Section -->
+            <div style="background: linear-gradient(135deg, #f0e7ff 0%, #ede9fe 100%); border: 2px solid #8b5cf6; border-radius: 10px; padding: 20px; margin-bottom: 30px; text-align: center;">
+              <div style="font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; font-weight: 600;">Ticket ID</div>
+              <div style="font-family: 'Courier New', monospace; font-size: 20px; font-weight: 700; color: #8b5cf6; word-break: break-all; margin-bottom: 8px;">${ticket.ticketId}</div>
+              <div style="display: inline-block; background: #16a34a; color: white; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">✓ CONFIRMED</div>
+            </div>
 
-Event:        ${ticket.eventTitle}
-Date:         ${dateStr}
-Time:         ${ticket.time}
-Venue:        ${ticket.venue}
-Location:     ${ticket.location}
+            <!-- Event Information -->
+            <div style="margin-bottom: 28px;">
+              <div style="font-size: 13px; color: #666; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid #e5e7eb;">📅 Event Information</div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                <div style="font-size: 12px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Event</div>
+                <div style="font-size: 15px; color: #333; font-weight: 500; text-align: right; flex: 1;">${ticket.eventTitle}</div>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                <div style="font-size: 12px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Date</div>
+                <div style="font-size: 15px; color: #333; font-weight: 500; text-align: right; flex: 1;">${dateStr}</div>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <div style="font-size: 12px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Time</div>
+                <div style="font-size: 15px; color: #333; font-weight: 500; text-align: right; flex: 1;">${ticket.time}</div>
+              </div>
+            </div>
 
-┌────────────────────────────────────────────────────────────────┐
-│ ATTENDEE INFORMATION                                           │
-└────────────────────────────────────────────────────────────────┘
+            <!-- Venue & Location -->
+            <div style="background: #f9f5ff; border-left: 4px solid #8b5cf6; padding: 20px; border-radius: 6px; margin-bottom: 28px;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                <div style="font-size: 12px; color: #666; font-weight: 600;">📍 VENUE</div>
+                <div style="font-size: 14px; color: #333; font-weight: 600; text-align: right;">${ticket.venue}</div>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <div style="font-size: 12px; color: #666; font-weight: 600;">📍 LOCATION</div>
+                <div style="font-size: 14px; color: #333; font-weight: 600; text-align: right;">${ticket.location}</div>
+              </div>
+            </div>
 
-Name:         ${ticket.userName}
-Email:        ${ticket.userEmail}
-Registered:   ${registeredStr}
+            <!-- Attendee Information -->
+            <div style="margin-bottom: 28px;">
+              <div style="font-size: 13px; color: #666; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid #e5e7eb;">👤 Attendee Information</div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                <div style="font-size: 12px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Name</div>
+                <div style="font-size: 15px; color: #333; font-weight: 500; text-align: right; flex: 1;">${ticket.userName}</div>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                <div style="font-size: 12px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Email</div>
+                <div style="font-size: 15px; color: #333; font-weight: 500; text-align: right; flex: 1; word-break: break-all;">${ticket.userEmail}</div>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <div style="font-size: 12px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Registered</div>
+                <div style="font-size: 15px; color: #333; font-weight: 500; text-align: right; flex: 1;">${registeredStr}</div>
+              </div>
+            </div>
 
-┌────────────────────────────────────────────────────────────────┐
-│ INSTRUCTIONS                                                   │
-└────────────────────────────────────────────────────────────────┘
+            <div style="height: 1px; background: #e5e7eb; margin: 24px 0;"></div>
 
-• Please arrive 15 minutes before the event starts
-• Bring this ticket or show it on your mobile device
-• Present your ticket at the event entrance
-• Keep this ticket safe for future reference
+            <!-- Instructions -->
+            <div style="background: #f0fdf4; border-left: 4px solid #16a34a; padding: 20px; border-radius: 6px; margin-bottom: 24px;">
+              <div style="font-size: 12px; color: #16a34a; text-transform: uppercase; font-weight: 700; margin-bottom: 12px; letter-spacing: 1px;">✓ Instructions</div>
+              <ul style="font-size: 13px; color: #334155; line-height: 1.8; margin: 0; padding-left: 20px;">
+                <li style="margin-bottom: 8px;">Please arrive 15 minutes before the event starts</li>
+                <li style="margin-bottom: 8px;">Bring this ticket or show it on your mobile device</li>
+                <li style="margin-bottom: 8px;">Present your ticket at the event entrance</li>
+                <li>Keep this ticket safe for future reference</li>
+              </ul>
+            </div>
 
-Generated: ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-Mind Mesh Event Management System
-╚════════════════════════════════════════════════════════════════╝
-    `.trim();
+            <!-- Footer -->
+            <div style="border-top: 2px dashed #e5e7eb; padding-top: 24px; text-align: center;">
+              <div style="font-size: 11px; color: #999; margin-bottom: 4px;">Generated on ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}</div>
+              <div style="font-size: 12px; color: #8b5cf6; font-weight: 700; letter-spacing: 1px;">MIND MESH EVENT MANAGEMENT</div>
+              <div style="font-size: 11px; color: #999; margin-top: 12px; font-style: italic;">Please bring valid ID to the event</div>
+            </div>
+          </div>
+        </div>
+      `;
 
-    // Create blob and download
-    const element = document.createElement("a");
-    element.setAttribute("href", "data:text/plain;charset=utf-8," + encodeURIComponent(ticketText));
-    element.setAttribute("download", `ticket_${ticket.ticketId}.txt`);
-    element.style.display = "none";
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
+      document.body.appendChild(tempContainer);
+
+      // Convert HTML to canvas
+      const canvas = await html2canvas(tempContainer, {
+        scale: 2,
+        logging: false,
+        backgroundColor: "#ffffff",
+      });
+
+      // Create PDF
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const imgWidth = 210; // A4 width in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const imgData = canvas.toDataURL("image/png");
+
+      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+      pdf.save(`ticket_${ticket.ticketId}.pdf`);
+
+      // Clean up
+      document.body.removeChild(tempContainer);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      alert("Failed to generate PDF. Please try again.");
+    }
   };
 
   const handlePrintTicket = (ticket: Ticket) => {
