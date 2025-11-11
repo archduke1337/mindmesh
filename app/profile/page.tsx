@@ -239,15 +239,15 @@ export default function ProfilePage() {
         <CardBody className="gap-6 px-4 md:px-8 pb-8">
           {/* Show upload status */}
           {updateError && (
-            <div className={`p-3 rounded-lg text-sm ${
-              updateSuccess ? "bg-success-50 text-success-700 dark:bg-success-900/20" : "bg-danger-50 text-danger-700 dark:bg-danger-900/20"
+            <div className={`p-3 md:p-4 rounded-lg text-xs md:text-small font-medium ${
+              updateSuccess ? "bg-success/10 text-success-700 dark:text-success-200" : "bg-danger/10 text-danger-700 dark:text-danger-200"
             }`}>
               {updateError}
             </div>
           )}
 
           <div className="border-t border-divider pt-6">
-            <h2 className="text-lg font-semibold mb-4">Account Information</h2>
+            <h2 className="text-base md:text-lg font-semibold mb-5">Account Information</h2>
             
             <div className="space-y-3 md:space-y-4">
               <div className="flex flex-col gap-2">
@@ -299,11 +299,11 @@ export default function ProfilePage() {
           </div>
 
           <div className="border-t border-divider pt-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Profile Details</h2>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5">
+              <h2 className="text-base md:text-lg font-semibold">Profile Details</h2>
               {!isEditing && (
                 <Button
-                  size="sm"
+                  size="lg"
                   color="primary"
                   variant="flat"
                   onPress={() => setIsEditing(true)}
@@ -314,7 +314,7 @@ export default function ProfilePage() {
             </div>
 
             {isEditing ? (
-              <form onSubmit={handleUpdateProfile} className="space-y-3 md:space-y-4">
+              <form onSubmit={handleUpdateProfile} className="space-y-4 md:space-y-5">
                 <Input
                   label="Name"
                   value={name}
@@ -323,14 +323,19 @@ export default function ProfilePage() {
                   required
                   isDisabled={updateLoading}
                   size="lg"
+                  classNames={{
+                    input: "text-sm md:text-base",
+                    label: "text-xs md:text-small font-semibold"
+                  }}
                 />
 
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
                   <Button
                     type="submit"
                     color="primary"
                     isLoading={updateLoading}
                     size="lg"
+                    className="flex-1"
                   >
                     Save Changes
                   </Button>
@@ -344,6 +349,7 @@ export default function ProfilePage() {
                     }}
                     isDisabled={updateLoading}
                     size="lg"
+                    className="flex-1"
                   >
                     Cancel
                   </Button>
