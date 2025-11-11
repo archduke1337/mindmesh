@@ -298,7 +298,7 @@ export default function TermsPage() {
           <CardBody className="p-6">
             <h3 className="font-semibold text-lg mb-2">Contact</h3>
             <p className="text-sm text-default-600">
-              Questions? Email legal@mindmesh.club or visit our office during
+              Questions? Email teammindmesh@gmail.com. or visit our office during
               business hours.
             </p>
           </CardBody>

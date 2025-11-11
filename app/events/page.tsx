@@ -48,7 +48,11 @@ export default function EventsPage() {
   useEffect(() => {
     loadEvents();
     loadSavedEvents();
-  }, []);
+    // Sync registered events from database if user is logged in
+    if (user) {
+      syncRegisteredEventsFromDatabase();
+    }
+  }, [user]);
 
   const loadEvents = async () => {
     try {
@@ -61,6 +65,38 @@ export default function EventsPage() {
       console.error("❌ Error loading events:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const syncRegisteredEventsFromDatabase = async () => {
+    try {
+      if (!user) return;
+      
+      console.log('🔄 Syncing registered events from database for user:', user.$id);
+      
+      // Get user's registrations from database
+      const userTickets = await eventService.getUserTickets(user.$id);
+      console.log('✅ Database registrations found:', userTickets.length);
+      
+      if (userTickets && userTickets.length > 0) {
+        const registeredEventIds = userTickets.map(ticket => ticket.eventId);
+        console.log('📋 Registered event IDs:', registeredEventIds);
+        
+        // Merge with existing localStorage registrations
+        const localRegistered = localStorage.getItem("registeredEvents");
+        const localIds = localRegistered ? JSON.parse(localRegistered) : [];
+        
+        // Combine and deduplicate
+        const mergedIds = Array.from(new Set([...localIds, ...registeredEventIds]));
+        
+        setRegisteredEvents(mergedIds);
+        localStorage.setItem("registeredEvents", JSON.stringify(mergedIds));
+        
+        console.log('✅ Registered events synced:', mergedIds.length);
+      }
+    } catch (error) {
+      console.warn('⚠️ Error syncing registered events:', error);
+      // Don't fail page load, just log warning
     }
   };
 
