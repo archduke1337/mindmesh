@@ -5,10 +5,6 @@ export const siteConfig = {
   description: "Collaborate, Innovate, and Create Together",
   navItems: [
     {
-      label: "Home",
-      href: "/",
-    },
-    {
       label: "About",
       href: "/about",
     },
