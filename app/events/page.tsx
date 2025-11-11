@@ -450,18 +450,32 @@ export default function EventsPage() {
                     )}
                   </div>
 
-                  <Button
-                    color={registeredEvents.includes(event.$id!) ? "default" : "primary"}
-                    variant={registeredEvents.includes(event.$id!) ? "flat" : "solid"}
-                    size="md"
-                    isLoading={registering === event.$id}
-                    onPress={(e) => toggleRegisterEvent(e as any, event.$id!)}
-                    endContent={
-                      !registeredEvents.includes(event.$id!) && <TicketIcon className="w-4 h-4" />
-                    }
-                  >
-                    {registeredEvents.includes(event.$id!) ? "Registered" : "Register"}
-                  </Button>
+                  <div className="flex gap-2 w-full">
+                    <Button
+                      color={registeredEvents.includes(event.$id!) ? "default" : "primary"}
+                      variant={registeredEvents.includes(event.$id!) ? "flat" : "solid"}
+                      size="md"
+                      isLoading={registering === event.$id}
+                      onPress={(e) => toggleRegisterEvent(e as any, event.$id!)}
+                      endContent={
+                        !registeredEvents.includes(event.$id!) && <TicketIcon className="w-4 h-4" />
+                      }
+                      className="flex-1"
+                    >
+                      {registeredEvents.includes(event.$id!) ? "Registered" : "Register"}
+                    </Button>
+                    {registeredEvents.includes(event.$id!) && (
+                      <Button
+                        color="secondary"
+                        variant="flat"
+                        size="md"
+                        startContent={<TicketIcon className="w-4 h-4" />}
+                        onPress={() => router.push("/tickets")}
+                      >
+                        View Ticket
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </CardFooter>
             </Card>
