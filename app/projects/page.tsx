@@ -84,14 +84,14 @@ export default function ProjectsPage() {
   };
 
   return (
-    <div className="space-y-8 md:space-y-12 pb-12 md:pb-20 px-4 sm:px-6 lg:px-8">
+    <div className="space-y-6 sm:space-y-8 md:space-y-10 lg:space-y-12 pb-10 sm:pb-12 md:pb-16 lg:pb-20 px-3 sm:px-4 md:px-6 lg:px-8">
       {/* Hero Section */}
-      <div className="text-center space-y-4 md:space-y-6 relative py-8 md:py-12">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute top-20 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" />
-        <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20 mb-4 md:mb-6">
-          <RocketIcon className="w-4 sm:w-5 h-4 sm:h-5 text-purple-500" />
-          <span className="text-xs sm:text-small font-semibold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+      <div className="text-center space-y-3 sm:space-y-4 md:space-y-5 lg:space-y-6 relative py-6 sm:py-8 md:py-10 lg:py-12">
+        <div className="absolute top-0 left-1/4 w-64 sm:w-80 md:w-96 h-64 sm:h-80 md:h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-8 sm:top-12 md:top-16 lg:top-20 right-1/4 w-64 sm:w-80 md:w-96 h-64 sm:h-80 md:h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" />
+        <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20 mb-2 sm:mb-3 md:mb-4 lg:mb-6">
+          <RocketIcon className="w-3 sm:w-3.5 md:w-4 lg:w-5 h-3 sm:h-3.5 md:h-4 lg:h-5 text-purple-500" />
+          <span className="text-xs sm:text-xs md:text-sm font-semibold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
             Innovative Projects
           </span>
         </div>
@@ -102,49 +102,47 @@ export default function ProjectsPage() {
               Amazing Projects
             </span>
           </h1>
-          <p className={subtitle({ class: "mt-4 md:mt-6 max-w-3xl mx-auto text-base md:text-lg" })}>
+          <p className={subtitle({ class: "mt-3 sm:mt-4 md:mt-5 lg:mt-6 max-w-3xl mx-auto text-xs sm:text-sm md:text-base lg:text-lg" })}>
             Discover cutting-edge projects built by our community. From AI to blockchain, explore the future of technology.
           </p>
         </div>
       </div>
 
       {/* Category Filters */}
-      <div className="w-full">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-wrap gap-2 md:gap-3 justify-center">
-            {categories.map((category) => (
-              <Chip
-                key={category.key}
-                variant={selectedCategory === category.key ? "solid" : "flat"}
-                color={selectedCategory === category.key ? "secondary" : "default"}
-                size="sm"
-                className={`cursor-pointer transition-all text-xs md:text-small ${
-                  selectedCategory === category.key 
-                    ? "bg-gradient-to-r from-purple-600 to-blue-500 text-white shadow-lg" 
-                    : "hover:shadow-md"
-                }`}
-                onClick={() => setSelectedCategory(category.key)}
-              >
-                {category.label}
-                <span className="ml-1 opacity-80">({category.count})</span>
-              </Chip>
-            ))}
-          </div>
+      <div className="w-full max-w-7xl mx-auto">
+        <div className="flex flex-wrap gap-1.5 sm:gap-2 md:gap-3 justify-center">
+          {categories.map((category) => (
+            <Chip
+              key={category.key}
+              variant={selectedCategory === category.key ? "solid" : "flat"}
+              color={selectedCategory === category.key ? "secondary" : "default"}
+              size="sm"
+              className={`cursor-pointer transition-all text-xs md:text-small ${
+                selectedCategory === category.key 
+                  ? "bg-gradient-to-r from-purple-600 to-blue-500 text-white shadow-lg" 
+                  : "hover:shadow-md"
+              }`}
+              onClick={() => setSelectedCategory(category.key)}
+            >
+              {category.label}
+              <span className="ml-1 opacity-80">({category.count})</span>
+            </Chip>
+          ))}
         </div>
       </div>
 
       {/* Loading State */}
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-20">
-          <Loader2Icon className="w-12 h-12 animate-spin text-purple-600" />
-          <p className="mt-4 text-default-600">Loading amazing projects...</p>
+        <div className="flex flex-col items-center justify-center py-12 sm:py-16 md:py-20">
+          <Loader2Icon className="w-10 sm:w-12 md:w-14 h-10 sm:h-12 md:h-14 animate-spin text-purple-600" />
+          <p className="mt-3 sm:mt-4 text-xs sm:text-sm md:text-base text-default-600">Loading amazing projects...</p>
         </div>
       ) : (
         <>
           {/* Projects Grid */}
           <div className="w-full">
             <div className="max-w-7xl mx-auto">
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
                 {filteredProjects.map((project) => (
                   <Card
                     key={project.$id}
@@ -158,18 +156,18 @@ export default function ProjectsPage() {
                         <img
                           src={project.image}
                           alt={project.title}
-                          className="w-full h-40 sm:h-44 md:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="w-full h-36 sm:h-40 md:h-44 lg:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                         
                         {/* Overlay Badges */}
-                        <div className="absolute top-2 sm:top-3 md:top-4 left-2 sm:left-3 md:left-4 flex flex-col gap-2">
+                        <div className="absolute top-2 sm:top-2.5 md:top-3 lg:top-4 left-2 sm:left-2.5 md:left-3 lg:left-4 flex flex-col gap-1.5 sm:gap-2">
                           {project.isFeatured && (
                             <Badge 
                               color="warning" 
                               variant="solid"
                               className="font-bold text-xs"
                             >
-                              <StarIcon className="w-3 h-3 mr-1" />
+                              <StarIcon className="w-2.5 sm:w-3 md:w-3.5 h-2.5 sm:h-3 md:h-3.5 mr-0.5" />
                               Featured
                             </Badge>
                           )}
@@ -179,12 +177,12 @@ export default function ProjectsPage() {
                         <Button
                           isIconOnly
                           variant="flat"
-                          className="absolute top-2 sm:top-3 md:top-4 right-2 sm:right-3 md:right-4 bg-white/90 dark:bg-black/90 backdrop-blur-sm"
+                          className="absolute top-2 sm:top-2.5 md:top-3 lg:top-4 right-2 sm:right-2.5 md:right-3 lg:right-4 bg-white/90 dark:bg-black/90 backdrop-blur-sm"
                           size="sm"
                           onPress={() => toggleSaveProject(project.$id!)}
                         >
                           <HeartIcon 
-                            className={`w-4 md:w-5 h-4 md:h-5 ${
+                            className={`w-3 sm:w-3.5 md:w-4 lg:w-5 h-3 sm:h-3.5 md:h-4 lg:h-5 ${
                               savedProjects.includes(project.$id!) 
                                 ? "text-red-500 fill-red-500" 
                                 : "text-default-600"
@@ -193,33 +191,34 @@ export default function ProjectsPage() {
                         </Button>
 
                         {/* Status Badge */}
-                        <div className="absolute bottom-2 sm:bottom-3 md:bottom-4 right-2 sm:right-3 md:right-4">
+                        <div className="absolute bottom-2 sm:bottom-2.5 md:bottom-3 lg:bottom-4 right-2 sm:right-2.5 md:right-3 lg:right-4">
                           <Chip
                             color={getStatusColor(project.status || "planning") as any}
                             variant="solid"
                             size="sm"
+                            className="text-xs"
                           >
-                          {(project.status || "planning").replace("-", " ")}
-                        </Chip>
+                            {(project.status || "planning").replace("-", " ")}
+                          </Chip>
+                        </div>
                       </div>
-                    </div>
 
                     {/* Project Content */}
-                    <div className="p-6 space-y-4">
+                    <div className="p-3 sm:p-4 md:p-5 lg:p-6 space-y-2 sm:space-y-2.5 md:space-y-3 lg:space-y-4">
                       {/* Header */}
-                      <div className="space-y-2">
-                        <h3 className="text-xl font-bold line-clamp-2 group-hover:text-purple-600 transition-colors">
+                      <div className="space-y-1.5 sm:space-y-2">
+                        <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold line-clamp-2 group-hover:text-purple-600 transition-colors">
                           {project.title}
                         </h3>
                         
-                        <p className="text-default-600 text-sm line-clamp-2">
+                        <p className="text-default-600 text-xs sm:text-xs md:text-sm line-clamp-2">
                           {project.description}
                         </p>
                       </div>
 
                       {/* Progress Bar */}
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
+                      <div className="space-y-1 sm:space-y-1.5">
+                        <div className="flex justify-between text-xs sm:text-xs md:text-sm">
                           <span className="text-default-600">Progress</span>
                           <span className="font-semibold">{project.progress}%</span>
                         </div>
@@ -231,23 +230,23 @@ export default function ProjectsPage() {
                       </div>
 
                       {/* Stats */}
-                      <div className="grid grid-cols-3 gap-4 text-center">
-                        <div className="space-y-1">
-                          <div className="flex items-center justify-center gap-1">
-                            <StarIcon className="w-4 h-4 text-yellow-500" />
-                            <span className="font-bold text-sm">{project.stars}</span>
+                      <div className="grid grid-cols-3 gap-2 sm:gap-3 text-center">
+                        <div className="space-y-0.5 sm:space-y-1">
+                          <div className="flex items-center justify-center gap-0.5 sm:gap-1">
+                            <StarIcon className="w-3 sm:w-3.5 md:w-4 h-3 sm:h-3.5 md:h-4 text-yellow-500" />
+                            <span className="font-bold text-xs sm:text-sm">{project.stars}</span>
                           </div>
                           <p className="text-xs text-default-500">Stars</p>
                         </div>
-                        <div className="space-y-1">
-                          <div className="flex items-center justify-center gap-1">
-                            <GitBranchIcon className="w-4 h-4 text-blue-500" />
-                            <span className="font-bold text-sm">{project.forks}</span>
+                        <div className="space-y-0.5 sm:space-y-1">
+                          <div className="flex items-center justify-center gap-0.5 sm:gap-1">
+                            <GitBranchIcon className="w-3 sm:w-3.5 md:w-4 h-3 sm:h-3.5 md:h-4 text-blue-500" />
+                            <span className="font-bold text-xs sm:text-sm">{project.forks}</span>
                           </div>
                           <p className="text-xs text-default-500">Forks</p>
                         </div>
-                        <div className="space-y-1">
-                          <div className="flex items-center justify-center gap-1">
+                        <div className="space-y-0.5 sm:space-y-1">
+                          <div className="flex items-center justify-center gap-0.5 sm:gap-1">
                             <UsersIcon className="w-4 h-4 text-green-500" />
                             <span className="font-bold text-sm">{project.contributors}</span>
                           </div>

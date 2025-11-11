@@ -244,30 +244,30 @@ export default function TeamPage() {
   const currentMember = coreTeam[currentIndex];
 
   return (
-    <section className="flex flex-col items-center justify-center w-full min-h-screen relative overflow-hidden py-8 md:py-12">
+    <section className="flex flex-col items-center justify-center w-full min-h-screen relative overflow-hidden py-6 sm:py-8 md:py-10 lg:py-12 px-3 sm:px-4 md:px-6">
       <div className="fixed inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-50/30 via-pink-50/20 to-blue-50/30 dark:from-purple-950/5 dark:via-pink-950/5 dark:to-blue-950/5" />
       </div>
 
-      <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="space-y-8 md:space-y-12">
-          <div className="text-center space-y-4">
-            <Chip color="secondary" variant="flat" size="md">Our Leadership</Chip>
+      <div className="w-full max-w-7xl">
+        <div className="space-y-6 sm:space-y-8 md:space-y-10 lg:space-y-12">
+          <div className="text-center space-y-3 sm:space-y-4 md:space-y-5">
+            <Chip color="secondary" variant="flat" size="md" className="text-xs sm:text-sm">Our Leadership</Chip>
 
-            <div className="space-y-3">
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
+            <div className="space-y-2 sm:space-y-3">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
                 Meet Our Team
               </h1>
 
-              <p className="text-sm md:text-base text-default-600 max-w-2xl mx-auto">
+              <p className="text-xs sm:text-sm md:text-base text-default-600 max-w-2xl mx-auto">
                 Passionate individuals dedicated to building an extraordinary community
               </p>
             </div>
           </div>
 
           <div className="relative" ref={containerRef}>
-            <div className="max-w-lg mx-auto">
-              <div className="relative h-[400px] sm:h-[500px] perspective-1200">
+            <div className="max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg mx-auto">
+              <div className="relative h-80 sm:h-96 md:h-[420px] lg:h-[500px] perspective-1200">
                 {coreTeam.map((member, index) => {
                   const position = index - currentIndex;
                   const isActive = position === 0;
@@ -300,41 +300,41 @@ export default function TeamPage() {
                       }}
                     >
                       <Card className="h-full border-none overflow-hidden" shadow="lg">
-                        <CardBody className="p-6 md:p-8 relative overflow-hidden">
-                          <div className="relative z-10 space-y-5">
+                        <CardBody className="p-4 sm:p-5 md:p-6 lg:p-8 relative overflow-hidden">
+                          <div className="relative z-10 space-y-3 sm:space-y-4 md:space-y-5">
                             <div className="flex justify-center">
                               <Avatar
                                 src={member.avatar}
                                 alt={`${member.name} avatar`}
-                                className="w-24 h-24 md:w-28 md:h-28 text-large"
+                                className="w-20 sm:w-24 md:w-26 lg:w-28 h-20 sm:h-24 md:h-26 lg:h-28 text-large"
                                 isBordered
                                 color={member.color}
                               />
                             </div>
 
-                            <div className="text-center space-y-2">
-                              <h2 className="text-xl md:text-2xl font-bold">
+                            <div className="text-center space-y-1.5 sm:space-y-2">
+                              <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold">
                                 {member.name}
                               </h2>
-                              <Chip color={member.color} variant="flat" size="sm" className="font-medium">
+                              <Chip color={member.color} variant="flat" size="sm" className="font-medium text-xs sm:text-sm">
                                 {member.role}
                               </Chip>
                             </div>
 
-                            <p className="text-center text-default-600 text-sm md:text-base leading-relaxed">
+                            <p className="text-center text-default-600 text-xs sm:text-sm md:text-base leading-relaxed">
                               {member.bio}
                             </p>
 
                             <Divider />
 
-                            <div className="flex flex-wrap gap-2 justify-center">
+                            <div className="flex flex-wrap gap-1.5 sm:gap-2 justify-center">
                               {member.achievements.map((achievement) => (
                                 <Chip
                                   key={achievement}
                                   size="sm"
                                   variant="bordered"
                                   color={member.color}
-                                  className="text-xs"
+                                  className="text-xs sm:text-xs"
                                 >
                                   {achievement}
                                 </Chip>
@@ -343,8 +343,8 @@ export default function TeamPage() {
                           </div>
                         </CardBody>
 
-                        <CardFooter className="flex flex-col gap-3 p-6 md:p-8 pt-0">
-                          <div className="flex justify-center gap-2 w-full">
+                        <CardFooter className="flex flex-col gap-2 sm:gap-3 p-4 sm:p-5 md:p-6 lg:p-8 pt-0">
+                          <div className="flex justify-center gap-1.5 sm:gap-2 w-full">
                             <Button
                               isIconOnly
                               as="a"
