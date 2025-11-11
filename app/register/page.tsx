@@ -63,14 +63,14 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
+    <div className="flex items-center justify-center min-h-[calc(100vh-200px)] px-4 sm:px-6 lg:px-8 py-8">
       <Card className="w-full max-w-md">
-        <CardHeader className="flex flex-col gap-1 items-start">
-          <h1 className="text-2xl font-bold">Create Account</h1>
-          <p className="text-small text-default-500">Sign up for Mind Mesh</p>
+        <CardHeader className="flex flex-col gap-1 items-start px-6 sm:px-8 pt-6 sm:pt-8">
+          <h1 className="text-xl sm:text-2xl font-bold">Create Account</h1>
+          <p className="text-xs sm:text-small text-default-500">Sign up for Mind Mesh</p>
         </CardHeader>
-        <CardBody>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <CardBody className="p-6 sm:p-8 gap-4">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-3 md:gap-4">
             <Input
               label="Name"
               placeholder="Enter your name"
@@ -79,6 +79,7 @@ export default function RegisterPage() {
               onChange={(e) => setName(e.target.value)}
               required
               isDisabled={loading}
+              size="lg"
             />
             <Input
               label="Email"
@@ -88,6 +89,7 @@ export default function RegisterPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               isDisabled={loading}
+              size="lg"
             />
             <Input
               label="Password"
@@ -97,6 +99,7 @@ export default function RegisterPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               isDisabled={loading}
+              size="lg"
             />
             <Input
               label="Confirm Password"
@@ -106,15 +109,17 @@ export default function RegisterPage() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
               isDisabled={loading}
+              size="lg"
             />
             {error && (
-              <div className="text-danger text-small">{error}</div>
+              <div className="text-danger text-xs sm:text-small">{error}</div>
             )}
             <Button
               type="submit"
               color="primary"
               isLoading={loading}
               className="w-full"
+              size="lg"
             >
               Create Account
             </Button>

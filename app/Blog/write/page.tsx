@@ -173,30 +173,31 @@ export default function WriteBlogPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 max-w-4xl">
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-6 md:mb-8">
         <Button
           variant="light"
           startContent={<ArrowLeftIcon className="w-4 h-4" />}
           onPress={() => router.back()}
           className="mb-4"
+          size="sm"
         >
           Back
         </Button>
-        <h1 className="text-4xl font-bold mb-2">Write a Blog</h1>
-        <p className="text-default-600">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">Write a Blog</h1>
+        <p className="text-sm md:text-base text-default-600">
           Share your knowledge and insights with the community
         </p>
       </div>
 
       {/* Form */}
       <Card className="border-none shadow-xl">
-        <CardHeader className="bg-gradient-to-r from-purple-500/10 to-pink-500/10">
-          <h2 className="text-xl font-bold">Blog Details</h2>
+        <CardHeader className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 px-6 sm:px-8">
+          <h2 className="text-lg md:text-xl font-bold">Blog Details</h2>
         </CardHeader>
-        <CardBody className="p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <CardBody className="p-6 sm:p-8">
+          <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
             {/* Title */}
             <Input
               label="Blog Title"

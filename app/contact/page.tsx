@@ -165,33 +165,33 @@ export default function ContactPage() {
   ];
 
   return (
-    <div className="space-y-16 pb-16">
+    <div className="space-y-12 md:space-y-16 pb-12 md:pb-16 px-4 sm:px-6 lg:px-8">
       {/* Hero Section */}
-      <div className="text-center space-y-4 relative">
-        <div className="absolute top-0 left-1/3 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute top-10 right-1/3 w-72 h-72 bg-pink-500/20 rounded-full blur-3xl animate-pulse" />
+      <div className="text-center space-y-4 md:space-y-6 relative">
+        <div className="absolute top-0 left-1/3 w-72 md:w-96 h-72 md:h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-10 right-1/3 w-56 md:w-72 h-56 md:h-72 bg-pink-500/20 rounded-full blur-3xl animate-pulse" />
 
         <div className="relative z-10">
           <h1 className={title({ size: "lg" })}>
             Get in{" "}
             <span className={title({ color: "violet", size: "lg" })}>Touch</span>
           </h1>
-          <p className={subtitle({ class: "mt-4 max-w-2xl mx-auto" })}>
+          <p className={subtitle({ class: "mt-4 max-w-2xl mx-auto text-sm md:text-base" })}>
             Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
           </p>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-8">
+      <div className="grid lg:grid-cols-3 gap-6 md:gap-8 max-w-7xl mx-auto">
         {/* Contact Form */}
         <div className="lg:col-span-2">
           <Card className="border-none shadow-xl" shadow="lg">
-            <CardHeader className="flex flex-col items-start px-8 pt-8 pb-0">
-              <h2 className="text-2xl font-bold">Send us a Message</h2>
-              <p className="text-default-600 mt-2">Fill out the form below and we'll get back to you shortly</p>
+            <CardHeader className="flex flex-col items-start px-6 sm:px-8 pt-6 sm:pt-8 pb-0">
+              <h2 className="text-xl md:text-2xl font-bold">Send us a Message</h2>
+              <p className="text-default-600 mt-2 text-sm md:text-base">Fill out the form below and we'll get back to you shortly</p>
             </CardHeader>
-            <CardBody className="p-8">
-              <form onSubmit={handleSubmit} className="space-y-6">
+            <CardBody className="p-6 sm:p-8">
+              <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
                 {submitStatus.type && (
                   <div
                     className={`p-4 rounded-lg ${submitStatus.type === "success"
