@@ -167,7 +167,7 @@ const coreTeam: TeamMember[] = [
   {
     name: "Abhay Bhadoriya",
     role: "Spokesperson",
-    avatar: "https://media.licdn.com/dms/image/v2/D4E35AQFDgmJyqCPwJA/profile-framedphoto-shrink_400_400/B4EZp21rXzHEAc-/0/1762930374458?e=1764806400&v=beta&t=c-RiNuqDmtZkNCikrG_af2dDY-j8NmduElh9uv0heSo",
+    avatar: "https://media.licdn.com/dms/image/v2/D4E35AQFDgmJyqCPwJA/profile-framedphoto-shrink_400_400/B4EZp21rXzHEAc-/0/1762930374458?e=1763582400&v=beta&t=c-RiNuqDmtZkNCikrG_af2dDY-j8NmduElh9uv0heSo",
     linkedin: "https://www.linkedin.com/in/abhay-bhadouriya-728ab0388/",
     bio: "Dedicated spokesperson committed to sharing our community's vision and values.",
     achievements: ["Public Relations", "Community Outreach"],
