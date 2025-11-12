@@ -44,7 +44,7 @@ const coreTeam: TeamMember[] = [
   {
     name: "Pratik Gaikwad",
     role: "Secretary",
-    avatar: "https://i.pravatar.cc/300?img=49",
+    avatar: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
     linkedin: "https://www.linkedin.com/in/pratik-g-6ba2b228b/",
     github: "https://github.com/pratikgaikwad", // Fixed: Assumed a placeholder; replace with actual if available
     bio: "Maintaining organizational records and communication.",
@@ -54,7 +54,7 @@ const coreTeam: TeamMember[] = [
   {
     name: "Pratik Shivekar",
     role: "Treasurer",
-    avatar: "https://i.pravatar.cc/300?img=49",
+    avatar: "https://media.licdn.com/dms/image/v2/D4D03AQF0kgyOG-6Cgw/profile-displayphoto-crop_800_800/B4DZpyW.XYJcAI-/0/1762855218734?e=1764806400&v=beta&t=LqCg8oN2J9swhyKEAZ75AFIjd52cGbscM0W3nml0sNU",
     linkedin: "https://www.linkedin.com/in/pratik-shivekar-b56330359/",
     github: "https://github.com/pratikshivekar",
     bio: "Managing finances and ensuring fiscal responsibility.",
@@ -64,7 +64,7 @@ const coreTeam: TeamMember[] = [
   {
     name: "Umer Zingu",
     role: "Head Of Management Operations & Community Manager",
-    avatar: "https://media.licdn.com/dms/image/v2/D4E03AQEYrpsBXr8l8A/profile-displayphoto-shrink_400_400/B4EZXW84PWG0Ag-/0/1743068041099?e=1764201600&v=beta&t=41sbJFoQYbqQW9smPJ1GeQO2NNvWsxqxAuONE8k4_4",
+    avatar: "https://media.licdn.com/dms/image/v2/D4E03AQEYrpsBXr8l8A/profile-displayphoto-shrink_800_800/B4EZXW84PWG0Ac-/0/1743068041136?e=1764806400&v=beta&t=wmZ-3zVlhTzq-_kQBPJgUC5Htt1mHM_zGXHRzkOjbv0",
     linkedin: "https://www.linkedin.com/in/umer-zingu-91b79a358/",
     bio: "Building and nurturing our vibrant community.",
     achievements: ["Community Building", "Operational Excellence"],
@@ -93,7 +93,7 @@ const coreTeam: TeamMember[] = [
   {
     name: "Om Bhatkar",
     role: "Head of Social Media Operations",
-    avatar: "https://media.licdn.com/dms/image/v2/D4E03AQF2rd-DDtygMw/profile-displayphoto-scale_400_400/B4EZghxNiRHEAk-/0/1752913207715?e=1764201600&v=beta&t=4MxtGA5Slq3_M4dKR3jfXYbBrn2PxFsSl32I5R_qgdE",
+    avatar: "https://media.licdn.com/dms/image/v2/D4D03AQG5llJpsKO08g/profile-displayphoto-crop_800_800/B4DZpxle3_JAAI-/0/1762842244777?e=1764806400&v=beta&t=l_YJsAfROgaiT76lecYRitH5miQxa13cdnMnWx19LwI",
     linkedin: "https://www.linkedin.com/in/om-bhatkar-549331359/",
     github: "https://github.com/ombhatkar",
     bio: "Creating engaging content and growing our online presence.",
@@ -112,7 +112,7 @@ const coreTeam: TeamMember[] = [
   {
     name: "Aarohi Londhe",
     role: "Head of Volunteer Management",
-    avatar: "https://media.licdn.com/dms/image/v2/D4E03AQEJ1k1Yk9y0xg/profile-displayphoto-scale_400_400/B4EZoX8f3YHgAg-/0/1761146284015?e=1764201600&v=beta&t=YJH1Z8I3b5nUu0KXo3b8YI3p9YJHh3L4F1KXjHq3b8Y",
+    avatar: "https://media.licdn.com/dms/image/v2/D5603AQEylPDYztC3Yg/profile-displayphoto-scale_400_400/B56Zp2IgHuG4Ag-/0/1762918533004?e=1764806400&v=beta&t=B4nStgIyRObd8JRlVH9yKF9kNSezBfWIrFGNfmEz6Bo",
     linkedin: "https://www.linkedin.com/in/aarohi-londhe-b47bb7358/",
     bio: "Coordinating volunteers and maximizing their impact.",
     achievements: ["Volunteer Coordination", "Team Development"],
@@ -121,7 +121,7 @@ const coreTeam: TeamMember[] = [
   {
     name: "Tanishka Bhojne",
     role: "Head of Volunteer Coordination",
-    avatar: "https://media.licdn.com/dms/image/v2/D4D03AQGvZhLfFfsexQ/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1730187799821?e=1764201600&v=beta&t=HK6oaBwevyz-YwoJsqS1FvYcbW-4GTL3tKVsKuW-SKU",
+    avatar: "https://media.licdn.com/dms/image/v2/D4D03AQGvZhLfFfsexQ/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1730187799821?e=1764806400&v=beta&t=5N7TEw_H4nj8pSIPocNh_up-ke5E-UKrzH5IwITw1Rk",
     linkedin: "https://www.linkedin.com/in/tanishka-bhojne-52b11b28b/",
     bio: "Ensuring smooth volunteer operations and engagement.",
     achievements: ["Operations Management", "Team Leadership"],
@@ -149,8 +149,8 @@ const coreTeam: TeamMember[] = [
   {
     name: "Geet Jain",
     role: "Lead Spokesperson",
-    avatar: "https://i.pravatar.cc/300?img=50",
-    linkedin: "https://www.linkedin.com/in/geetjain",
+    avatar: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
+    linkedin: "https://www.linkedin.com/in/geet-jain-03369b388/",
     bio: "Representing our community with clarity and confidence.",
     achievements: ["Public Speaking", "Media Relations"],
     color: "primary",
@@ -158,8 +158,8 @@ const coreTeam: TeamMember[] = [
   {
     name: "Samidha Nawani",
     role: "Spokesperson",
-    avatar: "https://i.pravatar.cc/300?img=51",
-    linkedin: "https://www.linkedin.com/in/samidhanawani",
+    avatar: "https://media.licdn.com/dms/image/v2/D4D03AQFf7_IcJBm8-Q/profile-displayphoto-scale_400_400/B4DZk.Q8_1HYAg-/0/1757686257157?e=1764806400&v=beta&t=HHwUmhBGNo1N_ObpRVUzzgA-f648Ld4e1S2PHDEePE4",
+    linkedin: "https://www.linkedin.com/in/samidha-nawani-399950278/",
     bio: "Communicating our vision to diverse audiences.",
     achievements: ["Communication Excellence", "Team Collaboration"],
     color: "primary",
@@ -167,8 +167,8 @@ const coreTeam: TeamMember[] = [
   {
     name: "Abhay Bhadoriya",
     role: "Spokesperson",
-    avatar: "https://i.pravatar.cc/300?img=52",
-    linkedin: "https://www.linkedin.com/in/abhaybhadoriya",
+    avatar: "https://media.licdn.com/dms/image/v2/D4E35AQFDgmJyqCPwJA/profile-framedphoto-shrink_400_400/B4EZp21rXzHEAc-/0/1762930374458?e=1764806400&v=beta&t=c-RiNuqDmtZkNCikrG_af2dDY-j8NmduElh9uv0heSo",
+    linkedin: "https://www.linkedin.com/in/abhay-bhadouriya-728ab0388/",
     bio: "Dedicated spokesperson committed to sharing our community's vision and values.",
     achievements: ["Public Relations", "Community Outreach"],
     color: "primary",
