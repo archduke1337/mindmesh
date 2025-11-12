@@ -9,6 +9,7 @@ export const EVENTS_COLLECTION_ID = "events";
 export const REGISTRATIONS_COLLECTION_ID = "registrations";
 export const PROJECTS_COLLECTION_ID = "projects";
 export const GALLERY_COLLECTION_ID = "gallery";
+export const TEAM_COLLECTION_ID = "team";
 export const EVENT_IMAGES_BUCKET_ID = "68ed50100010aa893cf8";
 export const GALLERY_IMAGES_BUCKET_ID = "69126ef7000269c07764";
 
@@ -88,6 +89,23 @@ export interface GalleryImage {
   isFeatured: boolean;
   tags: string[];
   eventId?: string;
+  $createdAt?: string;
+  $updatedAt?: string;
+}
+
+// Team Member Interface
+export interface TeamMember {
+  $id?: string;
+  name: string;
+  role: string;
+  avatar: string;
+  linkedin: string;
+  github?: string;
+  bio?: string;
+  achievements?: string[];
+  color: "primary" | "secondary" | "warning" | "danger" | "success";
+  position: number;
+  isActive: boolean;
   $createdAt?: string;
   $updatedAt?: string;
 }
@@ -730,6 +748,172 @@ export const galleryService = {
       return response as unknown as GalleryImage;
     } catch (error) {
       console.error("Error toggling featured status:", error);
+      throw error;
+    }
+  },
+};
+
+// Team Service
+export const teamService = {
+  // Get all team members
+  async getAllTeamMembers(queries: string[] = []) {
+    try {
+      const response = await databases.listDocuments(
+        DATABASE_ID,
+        TEAM_COLLECTION_ID,
+        [Query.orderAsc("position"), ...queries]
+      );
+      return response.documents as unknown as TeamMember[];
+    } catch (error) {
+      console.error("Error fetching team members:", error);
+      throw error;
+    }
+  },
+
+  // Get active team members
+  async getActiveTeamMembers() {
+    try {
+      const response = await databases.listDocuments(
+        DATABASE_ID,
+        TEAM_COLLECTION_ID,
+        [Query.equal("isActive", true), Query.orderAsc("position")]
+      );
+      return response.documents as unknown as TeamMember[];
+    } catch (error) {
+      console.error("Error fetching active team members:", error);
+      throw error;
+    }
+  },
+
+  // Get team member by ID
+  async getTeamMemberById(memberId: string) {
+    try {
+      const response = await databases.getDocument(
+        DATABASE_ID,
+        TEAM_COLLECTION_ID,
+        memberId
+      );
+      return response as unknown as TeamMember;
+    } catch (error) {
+      console.error("Error fetching team member:", error);
+      throw error;
+    }
+  },
+
+  // Create team member
+  async createTeamMember(memberData: Omit<TeamMember, '$id' | '$createdAt' | '$updatedAt'>) {
+    try {
+      const response = await databases.createDocument(
+        DATABASE_ID,
+        TEAM_COLLECTION_ID,
+        ID.unique(),
+        memberData
+      );
+      return response as unknown as TeamMember;
+    } catch (error) {
+      console.error("Error creating team member:", error);
+      throw error;
+    }
+  },
+
+  // Update team member
+  async updateTeamMember(memberId: string, memberData: Partial<TeamMember>) {
+    try {
+      const response = await databases.updateDocument(
+        DATABASE_ID,
+        TEAM_COLLECTION_ID,
+        memberId,
+        memberData
+      );
+      return response as unknown as TeamMember;
+    } catch (error) {
+      console.error("Error updating team member:", error);
+      throw error;
+    }
+  },
+
+  // Delete team member
+  async deleteTeamMember(memberId: string) {
+    try {
+      await databases.deleteDocument(
+        DATABASE_ID,
+        TEAM_COLLECTION_ID,
+        memberId
+      );
+      return true;
+    } catch (error) {
+      console.error("Error deleting team member:", error);
+      throw error;
+    }
+  },
+
+  // Upload team member avatar
+  async uploadTeamMemberAvatar(file: File) {
+    try {
+      const response = await storage.createFile(
+        EVENT_IMAGES_BUCKET_ID,
+        ID.unique(),
+        file
+      );
+      
+      const fileUrl = storage.getFileView(EVENT_IMAGES_BUCKET_ID, response.$id);
+      const urlString = fileUrl.toString();
+      
+      return urlString;
+    } catch (error) {
+      console.error("Error uploading team member avatar:", error);
+      throw error;
+    }
+  },
+
+  // Reorder team members
+  async reorderTeamMembers(memberIds: string[]) {
+    try {
+      const updatePromises = memberIds.map((id, index) =>
+        databases.updateDocument(
+          DATABASE_ID,
+          TEAM_COLLECTION_ID,
+          id,
+          { position: index }
+        )
+      );
+
+      await Promise.all(updatePromises);
+      return true;
+    } catch (error) {
+      console.error("Error reordering team members:", error);
+      throw error;
+    }
+  },
+
+  // Deactivate team member
+  async deactivateTeamMember(memberId: string) {
+    try {
+      const response = await databases.updateDocument(
+        DATABASE_ID,
+        TEAM_COLLECTION_ID,
+        memberId,
+        { isActive: false }
+      );
+      return response as unknown as TeamMember;
+    } catch (error) {
+      console.error("Error deactivating team member:", error);
+      throw error;
+    }
+  },
+
+  // Activate team member
+  async activateTeamMember(memberId: string) {
+    try {
+      const response = await databases.updateDocument(
+        DATABASE_ID,
+        TEAM_COLLECTION_ID,
+        memberId,
+        { isActive: true }
+      );
+      return response as unknown as TeamMember;
+    } catch (error) {
+      console.error("Error activating team member:", error);
       throw error;
     }
   },

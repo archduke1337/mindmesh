@@ -179,7 +179,6 @@ export default function TeamPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState<"left" | "right" | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const navigateTo = useCallback((newIndex: number) => {
@@ -252,7 +251,6 @@ export default function TeamPage() {
     const container = containerRef.current;
     if (!container) return;
 
-    // Only listen for keyboard and touch events, not wheel scroll
     container.addEventListener("touchstart", handleTouchStart, { passive: true });
     container.addEventListener("touchend", handleTouchEnd, { passive: true });
     window.addEventListener("keydown", handleKeyDown);
@@ -261,9 +259,6 @@ export default function TeamPage() {
       container.removeEventListener("touchstart", handleTouchStart);
       container.removeEventListener("touchend", handleTouchEnd);
       window.removeEventListener("keydown", handleKeyDown);
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
     };
   }, [handleTouchStart, handleTouchEnd, handleKeyDown]);
 
@@ -471,7 +466,7 @@ export default function TeamPage() {
             {/* Navigation Instructions */}
             <div className="text-center mt-4 mb-6">
               <p className="text-xs md:text-sm text-default-500">
-                Scroll, swipe or use arrow keys to navigate
+                Swipe or use arrow keys to navigate
               </p>
             </div>
 
