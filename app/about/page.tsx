@@ -35,11 +35,23 @@ export default function AboutPage() {
   ];
 
   const teamMembers = [
-    "https://i.pravatar.cc/150?u=a042581f4e29026024d",
-    "https://i.pravatar.cc/150?u=a04258a2462d826712d",
-    "https://i.pravatar.cc/150?u=a042581f4e29026704d",
-    "https://i.pravatar.cc/150?u=a04258114e29026302d",
-    "https://i.pravatar.cc/150?u=a04258114e29026708c",
+    "https://media.licdn.com/dms/image/v2/D4D03AQEOBVyo_6WEfA/profile-displayphoto-scale_400_400/B4DZnXX7eLHsAg-/0/1760255005521?e=1764201600&v=beta&t=D5FnZeZbXTQKVBJHh9f2-oGyxKAKZVmDA30YB9qW0Hc",
+    "https://media.licdn.com/dms/image/v2/D5635AQHH0c4L15sfqw/profile-framedphoto-shrink_400_400/B56Zfl.e.tHoAg-/0/1751910052068?e=1763359200&v=beta&t=MRb5sdffjPqrSXtsJ4wERO3a7Vi1el8G1qXtNG_RIck",
+    "https://media.licdn.com/dms/image/v2/D4D03AQF0kgyOG-6Cgw/profile-displayphoto-crop_800_800/B4DZpyW.XYJcAI-/0/1762855218734?e=1764806400&v=beta&t=LqCg8oN2J9swhyKEAZ75AFIjd52cGbscM0W3nml0sNU",
+    "https://media.licdn.com/dms/image/v2/D4E03AQEYrpsBXr8l8A/profile-displayphoto-shrink_800_800/B4EZXW84PWG0Ac-/0/1743068041136?e=1764806400&v=beta&t=wmZ-3zVlhTzq-_kQBPJgUC5Htt1mHM_zGXHRzkOjbv0",
+    "https://media.licdn.com/dms/image/v2/D5603AQFLDM_ENRFRCA/profile-displayphoto-scale_400_400/B56ZoNPY40KEAg-/0/1761158730093?e=1764201600&v=beta&t=O1px96p5cwLYnzpy-rTtjlL3nrvxvcUlhsQj1aXE1RY",
+    "https://media.licdn.com/dms/image/v2/D4E03AQHGBQHEQ-VPDw/profile-displayphoto-scale_400_400/B4EZoMf5JUHgAg-/0/1761146284014?e=1764201600&v=beta&t=1rJj-aMGQ49FGvI-8IHOt0SXUFJBRzf8IxDa4qkRRrU",
+    "https://media.licdn.com/dms/image/v2/D4E03AQHGBQHEQ-VPDw/profile-displayphoto-scale_400_400/B4EZoMf5JUHgAg-/0/1761146284014?e=1764201600&v=beta&t=1rJj-aMGQ49FGvI-8IHOt0SXUFJBRzf8IxDa4qkRRrU",
+    "https://media.licdn.com/dms/image/v2/D4D03AQG5llJpsKO08g/profile-displayphoto-crop_800_800/B4DZpxle3_JAAI-/0/1762842244777?e=1764806400&v=beta&t=l_YJsAfROgaiT76lecYRitH5miQxa13cdnMnWx19LwI",
+    "https://media.licdn.com/dms/image/v2/D5603AQEylPDYztC3Yg/profile-displayphoto-scale_400_400/B56Zp2IgHuG4Ag-/0/1762918533004?e=1764806400&v=beta&t=B4nStgIyRObd8JRlVH9yKF9kNSezBfWIrFGNfmEz6Bo",
+    "https://media.licdn.com/dms/image/v2/D4D03AQGvZhLfFfsexQ/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1730187799821?e=1764806400&v=beta&t=5N7TEw_H4nj8pSIPocNh_up-ke5E-UKrzH5IwITw1Rk",
+    "https://media.licdn.com/dms/image/v2/D4E03AQEGjffrIlXf7Q/profile-displayphoto-scale_400_400/B4EZofGW4KKcAg-/0/1761458353748?e=1764201600&v=beta&t=oodt2YCESjezc9YiJvnyxoO9NJIMkk3SbzSdcl6l4Yc",
+    "https://media.licdn.com/dms/image/v2/D4E03AQHwiqK1TZOheg/profile-displayphoto-scale_400_400/B4EZpsTE32GUAg-/0/1762753534343?e=1764201600&v=beta&t=qNd_FiEoKHDpB_Bp3ytjqeWra509pe5IO8eIJzIw60k",
+    "https://media.licdn.com/dms/image/v2/D4D03AQFf7_IcJBm8-Q/profile-displayphoto-scale_400_400/B4DZk.Q8_1HYAg-/0/1757686257157?e=1764806400&v=beta&t=HHwUmhBGNo1N_ObpRVUzzgA-f648Ld4e1S2PHDEePE4",
+    "https://media.licdn.com/dms/image/v2/D4E35AQFDgmJyqCPwJA/profile-framedphoto-shrink_400_400/B4EZp21rXzHEAc-/0/1762930374458?e=1763582400&v=beta&t=c-RiNuqDmtZkNCikrG_af2dDY-j8NmduElh9uv0heSo",
+
+
+
   ];
 
   return (
