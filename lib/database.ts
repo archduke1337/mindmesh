@@ -170,17 +170,18 @@ export const eventService = {
   // Create event - Remove status if it doesn't exist in collection
   async createEvent(eventData: Omit<Event, '$id' | '$createdAt' | '$updatedAt'>) {
     try {
-      // Ensure status has a default value
-      const dataWithStatus = {
+      // Ensure status and isClosed have default values
+      const dataWithDefaults = {
         ...eventData,
         status: eventData.status || "upcoming",
+        isClosed: eventData.isClosed ?? false,
       };
       
       const response = await databases.createDocument(
         DATABASE_ID,
         EVENTS_COLLECTION_ID,
         ID.unique(),
-        dataWithStatus
+        dataWithDefaults
       );
       return response as unknown as Event;
     } catch (error) {
@@ -192,17 +193,18 @@ export const eventService = {
   // Update event
   async updateEvent(eventId: string, eventData: Partial<Event>) {
     try {
-      // Ensure status has a default value if provided
-      const dataWithStatus = {
+      // Ensure status and isClosed have default values if provided
+      const dataWithDefaults = {
         ...eventData,
         status: eventData.status || "upcoming",
+        isClosed: eventData.isClosed ?? false,
       };
       
       const response = await databases.updateDocument(
         DATABASE_ID,
         EVENTS_COLLECTION_ID,
         eventId,
-        dataWithStatus
+        dataWithDefaults
       );
       return response as unknown as Event;
     } catch (error) {
