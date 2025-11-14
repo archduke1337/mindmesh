@@ -199,7 +199,7 @@ export default function BlogPage() {
                 <SelectItem key="all">All Categories</SelectItem>
                 {blogCategories.map((cat) => (
                   <SelectItem key={cat.value}>{cat.label}</SelectItem>
-                ))}
+                )) as any}
               </Select>
             </div>
           </CardBody>
