@@ -42,23 +42,18 @@ export function canUserPerformAction(
   user: Models.User<Models.Preferences> | null,
   action: "create" | "edit" | "delete" | "approve"
 ): boolean {
-  if (!user) return false;
-  
-  // Check if user is admin first
-  if (!isUserAdmin(user)) return false;
+  if (!user || !isUserAdmin(user)) return false;
   
   const role = getUserRole(user);
   
-  switch (action) {
-    case "create":
-      return ["admin", "moderator"].includes(role) || isUserAdmin(user);
-    case "edit":
-      return ["admin", "moderator"].includes(role) || isUserAdmin(user);
-    case "delete":
-      return role === "admin" || isUserAdmin(user);
-    case "approve":
-      return ["admin", "moderator"].includes(role) || isUserAdmin(user);
-    default:
-      return false;
+  // Admin can perform all actions
+  if (role === "admin") return true;
+  
+  // Moderator can create, edit, and approve
+  if (role === "moderator") {
+    return ["create", "edit", "approve"].includes(action);
   }
+  
+  // Admin email users can perform all actions
+  return true;
 }
