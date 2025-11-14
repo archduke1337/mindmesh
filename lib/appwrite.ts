@@ -9,23 +9,63 @@ export const account = new Account(client);
 export const storage = new Storage(client);
 export const databases = new Databases(client);
 
-// Server-side admin access (use with API key)
+// Server-side admin access via REST API with headers
 export const createAdminDatabases = () => {
-  const adminClient = new Client()
-    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
-    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!)
-    .setKey(process.env.APPWRITE_API_KEY || "");
-  
-  return new Databases(adminClient);
+  // In server-side API routes, we'll make direct REST calls with API key header
+  // instead of using the SDK client
+  return {
+    createDocument: async (databaseId: string, collectionId: string, documentId: string, data: any) => {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT}/databases/${databaseId}/collections/${collectionId}/documents`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Appwrite-Key": process.env.APPWRITE_API_KEY || "",
+          },
+          body: JSON.stringify({
+            documentId,
+            data,
+          }),
+        }
+      );
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to create document");
+      }
+      
+      return response.json();
+    },
+  } as any;
 };
 
 export const createAdminStorage = () => {
-  const adminClient = new Client()
-    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
-    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!)
-    .setKey(process.env.APPWRITE_API_KEY || "");
-  
-  return new Storage(adminClient);
+  return {
+    createFile: async (bucketId: string, fileId: string, file: File) => {
+      const formData = new FormData();
+      formData.append("fileId", fileId);
+      formData.append("file", file);
+      
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT}/storage/buckets/${bucketId}/files`,
+        {
+          method: "POST",
+          headers: {
+            "X-Appwrite-Key": process.env.APPWRITE_API_KEY || "",
+          },
+          body: formData,
+        }
+      );
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to upload file");
+      }
+      
+      return response.json();
+    },
+  } as any;
 };
 
 // Export configuration
