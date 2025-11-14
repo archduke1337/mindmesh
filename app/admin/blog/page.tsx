@@ -356,9 +356,9 @@ export default function AdminBlogsPage() {
 
                     {/* Tags */}
                     <div className="flex flex-wrap gap-1 md:gap-2">
-                      {blog.tags.map((tag, i) => (
+                      {blog.tags.split(",").map((tag, i) => (
                         <Chip key={i} size="sm" variant="flat">
-                          #{tag}
+                          #{tag.trim()}
                         </Chip>
                       ))}
                     </div>

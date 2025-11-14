@@ -211,9 +211,9 @@ export default function BlogPostPage() {
             <CardBody className="p-4 sm:p-6 md:p-8">
               <h3 className="font-semibold mb-2 sm:mb-3 md:mb-4 text-xs sm:text-small md:text-base">Tags</h3>
               <div className="flex flex-wrap gap-1.5 sm:gap-2 md:gap-3">
-                {blog.tags.map((tag, index) => (
+                {blog.tags.split(",").map((tag, index) => (
                   <Chip key={index} variant="flat" color="primary" size="sm" className="text-[10px] sm:text-xs md:text-small">
-                    #{tag}
+                    #{tag.trim()}
                   </Chip>
                 ))}
               </div>
