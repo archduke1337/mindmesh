@@ -72,8 +72,13 @@ export async function POST(request: NextRequest): Promise<NextResponse<RegisterR
       `equal("eventId","${eventId}")`,
       `equal("userId","${userId}")`
     ];
-    const queryString = queries.map((q, i) => `queries[${i}]=${encodeURIComponent(q)}`).join('&');
-    const listUrl = `${endpoint}/v1/databases/${databaseId}/collections/${registrationsCollectionId}/documents?${queryString}`;
+    const queryParams = new URLSearchParams();
+    queries.forEach((q, i) => {
+      queryParams.append(`queries[${i}]`, q);
+    });
+    const listUrl = `${endpoint}/v1/databases/${databaseId}/collections/${registrationsCollectionId}/documents?${queryParams.toString()}`;
+    
+    console.log(`[API] Checking registrations at: ${listUrl}`);
     
     const listResponse = await fetch(listUrl, {
       method: 'GET',
@@ -86,7 +91,15 @@ export async function POST(request: NextRequest): Promise<NextResponse<RegisterR
 
     if (!listResponse.ok) {
       const errorData = await listResponse.json().catch(() => ({}));
-      console.error('[API] Check registrations failed:', listResponse.status, errorData);
+      console.error('[API] Check registrations failed:', {
+        status: listResponse.status,
+        url: listUrl,
+        error: errorData,
+        headers: {
+          'X-Appwrite-Key': apiKey ? 'SET' : 'MISSING',
+          'X-Appwrite-Project': projectId
+        }
+      });
       throw new Error(`Failed to check existing registrations: ${listResponse.statusText}`);
     }
 
