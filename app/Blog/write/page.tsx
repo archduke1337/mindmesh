@@ -12,6 +12,7 @@ import { Spinner } from "@heroui/spinner";
 import { blogService, blogCategories } from "@/lib/blog";
 import { useAuth } from "@/context/AuthContext";
 import { getErrorMessage } from "@/lib/errorHandler";
+import { draftService } from "@/lib/draftService";
 import { ArrowLeftIcon, SendIcon, ImageIcon } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -22,6 +23,8 @@ export default function WriteBlogPage() {
   const [submitting, setSubmitting] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [showRestorePrompt, setShowRestorePrompt] = useState(false);
+  const [draftSaveTime, setDraftSaveTime] = useState<string | null>(null);
 
   const showToast = useCallback((message: string, type: "success" | "error" = "success") => {
     setToast({ message, type });
@@ -44,6 +47,23 @@ export default function WriteBlogPage() {
       setTimeout(() => router.push("/login"), 1500);
     }
   }, [user, loading, router, showToast]);
+
+  useEffect(() => {
+    // Check if user exists and has a draft
+    if (user && draftService.hasDraft()) {
+      setShowRestorePrompt(true);
+    }
+
+    // Set up auto-save interval
+    const autoSaveInterval = setInterval(() => {
+      if (user) {
+        draftService.saveDraft(formData);
+        setDraftSaveTime(new Date().toLocaleTimeString());
+      }
+    }, 30000); // Auto-save every 30 seconds
+
+    return () => clearInterval(autoSaveInterval);
+  }, [user, formData]);
 
   useEffect(() => {
     // Check if blogs collection exists on mount
@@ -147,6 +167,9 @@ export default function WriteBlogPage() {
         throw new Error(errMsg);
       }
 
+      // Clear draft on successful submission
+      draftService.clearDraft();
+      
       showToast(result.message || "Blog submitted successfully! It will be reviewed by our team before publishing.", "success");
       setTimeout(() => router.push("/Blog"), 1500);
     } catch (error) {
@@ -156,6 +179,35 @@ export default function WriteBlogPage() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleRestoreDraft = () => {
+    const draft = draftService.loadDraft();
+    if (draft) {
+      setFormData({
+        title: draft.title || "",
+        excerpt: draft.excerpt || "",
+        content: draft.content || "",
+        coverImage: draft.coverImage || "",
+        category: draft.category || "",
+        tags: draft.tags || "",
+      });
+      setShowRestorePrompt(false);
+      showToast("Draft restored successfully!", "success");
+    }
+  };
+
+  const handleDiscardDraft = () => {
+    draftService.clearDraft();
+    setShowRestorePrompt(false);
+    setFormData({
+      title: "",
+      excerpt: "",
+      content: "",
+      coverImage: "",
+      category: "",
+      tags: "",
+    });
   };
 
   // Show loading state while checking auth
@@ -196,6 +248,27 @@ export default function WriteBlogPage() {
   }
 
   return (
+    <div className="min-h-screen bg-gradient-to-b from-default-50 to-default-100 py-8 px-4 sm:px-6 md:px-8">
+      <div className="max-w-4xl mx-auto">
+        {/* Restore Draft Prompt */}
+        {showRestorePrompt && (
+          <Card className="mb-6 border-2 border-warning bg-warning/10">
+            <CardBody className="p-4 md:p-6 space-y-4">
+              <div>
+                <p className="font-semibold text-warning">Draft Found</p>
+                <p className="text-sm text-default-600">We found a draft from your last session. Would you like to restore it?</p>
+              </div>
+              <div className="flex gap-2">
+                <Button size="sm" color="warning" onPress={handleRestoreDraft}>
+                  Restore Draft
+                </Button>
+                <Button size="sm" variant="flat" onPress={handleDiscardDraft}>
+                  Start Fresh
+                </Button>
+              </div>
+            </CardBody>
+          </Card>
+        )}
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 max-w-4xl">
       {/* Header */}
       <div className="mb-6 md:mb-8">
@@ -216,8 +289,11 @@ export default function WriteBlogPage() {
 
       {/* Form */}
       <Card className="border-none shadow-xl">
-        <CardHeader className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 px-4 sm:px-6 md:px-8 py-4 md:py-6">
+        <CardHeader className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 px-4 sm:px-6 md:px-8 py-4 md:py-6 flex justify-between items-center">
           <h2 className="text-lg md:text-2xl font-bold">Blog Details</h2>
+          {draftSaveTime && (
+            <p className="text-xs text-default-500">Draft saved at {draftSaveTime}</p>
+          )}
         </CardHeader>
         <CardBody className="p-4 sm:p-6 md:p-8">
           <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6 lg:space-y-8">
