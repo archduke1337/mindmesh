@@ -19,7 +19,7 @@ import { EVENT_TEMPLATES } from "@/lib/eventTemplates";
 import { calculateEventMetrics, getCapacityAlertMessage, estimateFutureRegistrations } from "@/lib/eventAnalytics";
 import { generateEventQRCodeUrl, generateEventShareQRCodeUrl } from "@/lib/eventQRCode";
 import { downloadEventStatsCSV, downloadRegistrationList } from "@/lib/eventExport";
-import { PlusIcon, Pencil, Trash2, Image as ImageIcon, CalendarIcon, MapPinIcon, UsersIcon, DollarSignIcon, TagIcon, StarIcon, CrownIcon, TrendingUpIcon, LinkIcon, AlertCircle, XIcon, QrCode, Download, Share2 } from "lucide-react";
+import { PlusIcon, Pencil, Trash2, Image as ImageIcon, CalendarIcon, MapPinIcon, UsersIcon, DollarSignIcon, TagIcon, StarIcon, CrownIcon, TrendingUpIcon, LinkIcon, AlertCircle, XIcon, QrCode, Download, Share2, RefreshCw } from "lucide-react";
 
 export default function AdminEventsPage() {
   const { user, loading } = useAuth();
@@ -41,6 +41,7 @@ export default function AdminEventsPage() {
   const [selectedEventForAnalytics, setSelectedEventForAnalytics] = useState<Event | null>(null);
   const [analyticsRegistrations, setAnalyticsRegistrations] = useState<Registration[]>([]);
   const [loadingAnalyticsRegistrations, setLoadingAnalyticsRegistrations] = useState(false);
+  const [syncingRegistrations, setSyncingRegistrations] = useState(false);
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
 
   // Form state
@@ -88,6 +89,43 @@ export default function AdminEventsPage() {
       setError(`Failed to load events: ${errorMsg}`);
     } finally {
       setLoadingEvents(false);
+    }
+  };
+
+  const syncRegistrationsCount = async () => {
+    try {
+      setSyncingRegistrations(true);
+      let totalSynced = 0;
+      
+      // For each event, get registrations and update the count
+      for (const event of events) {
+        try {
+          const regs = await eventService.getEventRegistrations(event.$id!);
+          const registrationCount = regs.length;
+          
+          // Update event registered count if it doesn't match
+          if (event.registered !== registrationCount) {
+            await eventService.updateEvent(event.$id!, {
+              ...event,
+              registered: registrationCount
+            });
+            totalSynced++;
+            console.log(`✅ Synced ${event.title}: ${registrationCount} registrations`);
+          }
+        } catch (err) {
+          console.warn(`⚠️ Failed to sync ${event.title}:`, err);
+        }
+      }
+      
+      // Reload events to show updated counts
+      await loadEvents();
+      alert(`✅ Synced ${totalSynced} events with latest registration counts`);
+    } catch (err) {
+      const errorMsg = getErrorMessage(err);
+      console.error("Error syncing registrations:", errorMsg);
+      alert(`Failed to sync registrations: ${errorMsg}`);
+    } finally {
+      setSyncingRegistrations(false);
     }
   };
 
@@ -290,6 +328,18 @@ export default function AdminEventsPage() {
 
       {/* Controls Section */}
       <div className="flex flex-col sm:flex-row gap-2 w-full mb-6 md:mb-8">
+        <Button 
+          color="warning" 
+          variant="flat" 
+          onPress={syncRegistrationsCount}
+          isLoading={syncingRegistrations}
+          className="w-full sm:w-auto"
+          size="sm"
+        >
+          <RefreshCw className="w-4 h-4" />
+          <span className="hidden sm:inline ml-2">Sync Registrations</span>
+          <span className="sm:hidden ml-2">Sync</span>
+        </Button>
         <Button 
           color="danger" 
           variant="flat" 
