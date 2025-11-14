@@ -180,6 +180,16 @@ export default function TicketsPageContent() {
 
   const handleDownloadTicket = async (ticket: Ticket) => {
     try {
+      // Fetch QR code image and convert to data URL
+      const qrCodeUrl = getQRCodeUrl(ticket);
+      const qrResponse = await fetch(qrCodeUrl);
+      const qrBlob = await qrResponse.blob();
+      const qrDataUrl = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(qrBlob);
+      });
+
       // Create a temporary container for rendering
       const tempContainer = document.createElement("div");
       tempContainer.style.position = "absolute";
@@ -205,6 +215,8 @@ export default function TicketsPageContent() {
           minute: "2-digit",
         }
       );
+
+      const ticketQRData = ticket.ticketQRData || `TICKET|${ticket.ticketId}|${ticket.userName}|${ticket.eventTitle}`;
 
       tempContainer.innerHTML = `
         <div style="max-width: 600px; margin: 0 auto;">
@@ -272,10 +284,22 @@ export default function TicketsPageContent() {
 
             <div style="height: 1px; background: #e5e7eb; margin: 24px 0;"></div>
 
-            <!-- QR Data Section (for PDF) -->
-            <div style="background: #f5f3ff; border: 1px solid #e9d5ff; border-radius: 6px; padding: 16px; margin-bottom: 24px;">
-              <div style="font-size: 11px; color: #7c3aed; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; font-weight: 700;">📱 QR Code Data (Text Format)</div>
-              <div style="font-family: 'Courier New', monospace; font-size: 11px; color: #6b21a8; background: white; padding: 12px; border-radius: 4px; word-break: break-all; line-height: 1.6;">${ticket.ticketQRData || 'N/A'}</div>
+            <!-- QR Code and Data Side-by-Side -->
+            <div style="display: flex; gap: 20px; margin-bottom: 24px; align-items: flex-start;">
+              <!-- QR Code Image -->
+              <div style="flex-shrink: 0;">
+                <div style="font-size: 11px; color: #7c3aed; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; font-weight: 700;">📱 QR Code</div>
+                <div style="background: white; border: 1px solid #e9d5ff; border-radius: 6px; padding: 8px;">
+                  <img src="${qrDataUrl}" alt="QR Code" style="width: 140px; height: 140px; display: block;" />
+                </div>
+              </div>
+              <!-- QR Data -->
+              <div style="flex: 1;">
+                <div style="font-size: 11px; color: #7c3aed; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; font-weight: 700;">📋 QR Data (Text Format)</div>
+                <div style="background: #f5f3ff; border: 1px solid #e9d5ff; border-radius: 6px; padding: 12px;">
+                  <div style="font-family: 'Courier New', monospace; font-size: 10px; color: #6b21a8; word-break: break-all; line-height: 1.6;">${ticketQRData}</div>
+                </div>
+              </div>
             </div>
 
             <!-- Instructions -->
@@ -655,10 +679,22 @@ export default function TicketsPageContent() {
                 
                 <div class="divider"></div>
                 
-                <!-- QR Data Section (for Print) -->
-                <div style="background: #f5f3ff; border: 1px solid #e9d5ff; border-radius: 6px; padding: 16px; margin-bottom: 24px;">
-                  <div style="font-size: 11px; color: #7c3aed; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; font-weight: 700;">📱 QR Code Data (Text Format)</div>
-                  <div style="font-family: 'Courier New', monospace; font-size: 11px; color: #6b21a8; background: white; padding: 12px; border-radius: 4px; word-break: break-all; line-height: 1.6;">${ticket.ticketQRData || 'N/A'}</div>
+                <!-- QR Code and Data Side-by-Side -->
+                <div style="display: flex; gap: 20px; margin-bottom: 24px; align-items: flex-start;">
+                  <!-- QR Code Image -->
+                  <div style="flex-shrink: 0;">
+                    <div style="font-size: 11px; color: #7c3aed; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; font-weight: 700;">📱 QR Code</div>
+                    <div style="background: white; border: 1px solid #e9d5ff; border-radius: 6px; padding: 8px;">
+                      <img src="${getQRCodeUrl(ticket)}" alt="QR Code" style="width: 140px; height: 140px; display: block;" />
+                    </div>
+                  </div>
+                  <!-- QR Data -->
+                  <div style="flex: 1;">
+                    <div style="font-size: 11px; color: #7c3aed; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; font-weight: 700;">📋 QR Data (Text Format)</div>
+                    <div style="background: #f5f3ff; border: 1px solid #e9d5ff; border-radius: 6px; padding: 12px;">
+                      <div style="font-family: 'Courier New', monospace; font-size: 10px; color: #6b21a8; word-break: break-all; line-height: 1.6;">${ticket.ticketQRData || `TICKET|${ticket.ticketId}|${ticket.userName}|${ticket.eventTitle}`}</div>
+                    </div>
+                  </div>
                 </div>
                 
                 <!-- Instructions -->
