@@ -1,7 +1,12 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Card, Button, Input, Badge, Divider, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from '@heroui/react';
+import { Card } from '@heroui/card';
+import { Button } from '@heroui/button';
+import { Input } from '@heroui/input';
+import { Badge } from '@heroui/badge';
+import { Divider } from '@heroui/divider';
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from '@heroui/modal';
 import { CheckCircle2, XCircle, AlertCircle, Camera, Zap } from 'lucide-react';
 
 interface CheckInRecord {
