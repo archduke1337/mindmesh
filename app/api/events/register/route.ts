@@ -47,26 +47,32 @@ export async function POST(request: NextRequest): Promise<NextResponse<RegisterR
 
     console.log(`[API] Registering user ${userId} for event ${eventId}`);
 
-    // Initialize Appwrite with admin API key for server-side operations
-    const adminClient = new Client()
-      .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
-      .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!)
-      .setHeader('X-Appwrite-Key', process.env.APPWRITE_API_KEY!); // Use API key for admin access
+    // Use Appwrite REST API directly with API key for admin access
+    const endpoint = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!;
+    const projectId = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!;
+    const apiKey = process.env.APPWRITE_API_KEY!;
+    const databaseId = DATABASE_ID;
+    const registrationsCollectionId = REGISTRATIONS_COLLECTION_ID;
 
-    const adminDatabases = new Databases(adminClient);
+    // Check if already registered using REST API
+    const listUrl = `${endpoint}/v1/databases/${databaseId}/collections/${registrationsCollectionId}/documents?queries[]=equal("eventId","${eventId}")&queries[]=equal("userId","${userId}")`;
+    
+    const listResponse = await fetch(listUrl, {
+      method: 'GET',
+      headers: {
+        'X-Appwrite-Key': apiKey,
+        'X-Appwrite-Project': projectId,
+        'Content-Type': 'application/json',
+      },
+    });
 
-    // Check if already registered
-    const existingRegistrations = await adminDatabases.listDocuments(
-      DATABASE_ID,
-      REGISTRATIONS_COLLECTION_ID,
-      [
-        Query.equal("eventId", eventId),
-        Query.equal("userId", userId),
-        Query.limit(1)
-      ]
-    );
+    if (!listResponse.ok) {
+      throw new Error(`Failed to check existing registrations: ${listResponse.statusText}`);
+    }
 
-    if (existingRegistrations.documents.length > 0) {
+    const listData = await listResponse.json();
+
+    if (listData.documents && listData.documents.length > 0) {
       return NextResponse.json(
         {
           success: false,
@@ -78,13 +84,23 @@ export async function POST(request: NextRequest): Promise<NextResponse<RegisterR
     }
 
     // Get event to check capacity
-    const eventDoc = await adminDatabases.getDocument(
-      DATABASE_ID,
-      EVENTS_COLLECTION_ID,
-      eventId
-    );
+    const getEventUrl = `${endpoint}/v1/databases/${databaseId}/collections/${EVENTS_COLLECTION_ID}/documents/${eventId}`;
+    
+    const getEventResponse = await fetch(getEventUrl, {
+      method: 'GET',
+      headers: {
+        'X-Appwrite-Key': apiKey,
+        'X-Appwrite-Project': projectId,
+        'Content-Type': 'application/json',
+      },
+    });
 
-    const event = eventDoc as any;
+    if (!getEventResponse.ok) {
+      throw new Error(`Failed to fetch event: ${getEventResponse.statusText}`);
+    }
+
+    const event = await getEventResponse.json();
+
     if (event.capacity && event.registered >= event.capacity) {
       return NextResponse.json(
         {
@@ -97,19 +113,32 @@ export async function POST(request: NextRequest): Promise<NextResponse<RegisterR
     }
 
     // Create registration document
-    const registration = await adminDatabases.createDocument(
-      DATABASE_ID,
-      REGISTRATIONS_COLLECTION_ID,
-      ID.unique(),
-      {
-        eventId,
-        userId,
-        userName,
-        userEmail,
-        registeredAt: new Date().toISOString(),
-      }
-    );
+    const createUrl = `${endpoint}/v1/databases/${databaseId}/collections/${registrationsCollectionId}/documents`;
+    
+    const createResponse = await fetch(createUrl, {
+      method: 'POST',
+      headers: {
+        'X-Appwrite-Key': apiKey,
+        'X-Appwrite-Project': projectId,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        documentId: ID.unique(),
+        data: {
+          eventId,
+          userId,
+          userName,
+          userEmail,
+          registeredAt: new Date().toISOString(),
+        }
+      })
+    });
 
+    if (!createResponse.ok) {
+      throw new Error(`Failed to create registration: ${createResponse.statusText}`);
+    }
+
+    const registration = await createResponse.json();
     const ticketId = registration.$id || '';
 
     if (!ticketId) {
@@ -120,15 +149,21 @@ export async function POST(request: NextRequest): Promise<NextResponse<RegisterR
 
     // Update event registered count
     try {
-      await adminDatabases.updateDocument(
-        DATABASE_ID,
-        EVENTS_COLLECTION_ID,
-        eventId,
-        {
-          registered: event.registered + 1
-        }
-      );
-      console.log(`[API] Updated event registered count to ${event.registered + 1}`);
+      const updateUrl = `${endpoint}/v1/databases/${databaseId}/collections/${EVENTS_COLLECTION_ID}/documents/${eventId}`;
+      
+      await fetch(updateUrl, {
+        method: 'PATCH',
+        headers: {
+          'X-Appwrite-Key': apiKey,
+          'X-Appwrite-Project': projectId,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          registered: (event.registered || 0) + 1
+        })
+      });
+      
+      console.log(`[API] Updated event registered count to ${(event.registered || 0) + 1}`);
     } catch (updateError) {
       console.warn(`[API] Warning: failed to update event registered count:`, updateError);
       // Don't fail registration if count update fails
