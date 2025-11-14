@@ -1,7 +1,7 @@
 // app/blog/write/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
@@ -21,6 +21,12 @@ export default function WriteBlogPage() {
   const { user, loading } = useAuth();
   const [submitting, setSubmitting] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+
+  const showToast = useCallback((message: string, type: "success" | "error" = "success") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  }, []);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -34,10 +40,10 @@ export default function WriteBlogPage() {
   useEffect(() => {
     // Wait for auth to finish loading before checking
     if (!loading && !user) {
-      alert("Please login to write a blog");
-      router.push("/login");
+      showToast("Please login to write a blog", "error");
+      setTimeout(() => router.push("/login"), 1500);
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, showToast]);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -45,13 +51,13 @@ export default function WriteBlogPage() {
 
     // Validate file type
     if (!file.type.startsWith("image/")) {
-      alert("Please select an image file");
+      showToast("Please select an image file", "error");
       return;
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert("Image size must be less than 5MB");
+      showToast("Image size must be less than 5MB", "error");
       return;
     }
 
@@ -59,10 +65,10 @@ export default function WriteBlogPage() {
     try {
       const imageUrl = await blogService.uploadBlogImage(file);
       setFormData({ ...formData, coverImage: imageUrl });
-      alert("Image uploaded successfully!");
+      showToast("Image uploaded successfully!", "success");
     } catch (error) {
       console.error("Error uploading image:", error);
-      alert("Failed to upload image");
+      showToast("Failed to upload image", "error");
     } finally {
       setUploadingImage(false);
     }
@@ -72,18 +78,18 @@ export default function WriteBlogPage() {
     e.preventDefault();
 
     if (!user) {
-      alert("Please login to submit a blog");
+      showToast("Please login to submit a blog", "error");
       return;
     }
 
     // Validation
     if (!formData.title || !formData.content || !formData.category) {
-      alert("Please fill in all required fields");
+      showToast("Please fill in all required fields", "error");
       return;
     }
 
     if (!formData.coverImage) {
-      alert("Please add a cover image");
+      showToast("Please add a cover image", "error");
       return;
     }
 
@@ -126,12 +132,12 @@ export default function WriteBlogPage() {
         throw new Error(errMsg);
       }
 
-      alert(result.message || "Blog submitted successfully! It will be reviewed by our team before publishing.");
-      router.push("/blog");
+      showToast(result.message || "Blog submitted successfully! It will be reviewed by our team before publishing.", "success");
+      setTimeout(() => router.push("/blog"), 1500);
     } catch (error) {
       const message = getErrorMessage(error);
       console.error("Error submitting blog:", message);
-      alert(message || "Failed to submit blog");
+      showToast(message || "Failed to submit blog", "error");
     } finally {
       setSubmitting(false);
     }
@@ -394,6 +400,20 @@ export default function WriteBlogPage() {
           </form>
         </CardBody>
       </Card>
+
+      {/* Toast Notification */}
+      {toast && (
+        <div className={`fixed bottom-4 right-4 px-4 py-3 rounded-lg text-white flex items-center gap-2 z-50 shadow-lg ${
+          toast.type === "success" ? "bg-success" : "bg-danger"
+        }`}>
+          {toast.type === "success" ? (
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+          ) : (
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" /></svg>
+          )}
+          {toast.message}
+        </div>
+      )}
     </div>
   );
 }
