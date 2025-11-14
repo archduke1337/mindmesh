@@ -43,6 +43,12 @@ export default function AdminEventsPage() {
   const [loadingAnalyticsRegistrations, setLoadingAnalyticsRegistrations] = useState(false);
   const [syncingRegistrations, setSyncingRegistrations] = useState(false);
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
+  
+  // Check-in state
+  const [checkinMode, setCheckinMode] = useState(false);
+  const [checkinData, setCheckinData] = useState('');
+  const [checkinRecords, setCheckinRecords] = useState<Array<{id: string; name: string; email: string; time: string; status: 'success' | 'duplicate' | 'error';}>>([]);
+  const [checkinStats, setCheckinStats] = useState({ successful: 0, duplicates: 0, errors: 0 });
 
   // Form state
   const [formData, setFormData] = useState<Partial<Event>>({
@@ -210,6 +216,9 @@ export default function AdminEventsPage() {
   const handleViewRegistrations = async (event: Event) => {
     setSelectedEventForRegistrations(event);
     setLoadingRegistrations(true);
+    setCheckinMode(false);
+    setCheckinRecords([]);
+    setCheckinStats({ successful: 0, duplicates: 0, errors: 0 });
     try {
       const regs = await eventService.getEventRegistrations(event.$id!);
       setRegistrations(regs);
@@ -220,6 +229,116 @@ export default function AdminEventsPage() {
       setLoadingRegistrations(false);
     }
     onRegistrationsOpen();
+  };
+
+  const parseCheckInQR = (data: string) => {
+    // Format: TICKET|{registrationId}|{userName}|{eventTitle}
+    const parts = data.split('|');
+    if (parts[0] === 'TICKET' && parts.length === 4) {
+      return {
+        ticketId: parts[1],
+        userName: parts[2],
+        eventTitle: parts[3],
+      };
+    }
+    return null;
+  };
+
+  const handleCheckinScan = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      const data = checkinData.trim();
+      if (!data) return;
+
+      const parsed = parseCheckInQR(data);
+      
+      if (!parsed) {
+        const record = {
+          id: 'INVALID',
+          name: 'Invalid QR Code',
+          email: 'unknown',
+          time: new Date().toLocaleTimeString(),
+          status: 'error' as const,
+        };
+        setCheckinRecords([record, ...checkinRecords]);
+        setCheckinStats(prev => ({ ...prev, errors: prev.errors + 1 }));
+        setCheckinData('');
+        return;
+      }
+
+      // Find registration by ticket ID (registration document ID)
+      const registration = registrations.find(r => r.$id === parsed.ticketId);
+      
+      if (!registration) {
+        const record = {
+          id: parsed.ticketId,
+          name: parsed.userName,
+          email: 'not found',
+          time: new Date().toLocaleTimeString(),
+          status: 'error' as const,
+        };
+        setCheckinRecords([record, ...checkinRecords]);
+        setCheckinStats(prev => ({ ...prev, errors: prev.errors + 1 }));
+        setCheckinData('');
+        return;
+      }
+
+      // Check for duplicates
+      const isDuplicate = checkinRecords.some(
+        r => r.id === parsed.ticketId && r.status === 'success'
+      );
+
+      const record = {
+        id: parsed.ticketId,
+        name: registration.userName,
+        email: registration.userEmail,
+        time: new Date().toLocaleTimeString(),
+        status: isDuplicate ? ('duplicate' as const) : ('success' as const),
+      };
+      
+      setCheckinRecords([record, ...checkinRecords]);
+      if (isDuplicate) {
+        setCheckinStats(prev => ({ ...prev, duplicates: prev.duplicates + 1 }));
+      } else {
+        setCheckinStats(prev => ({ ...prev, successful: prev.successful + 1 }));
+      }
+      
+      setCheckinData('');
+    }
+  };
+
+  const handleResetCheckin = () => {
+    setCheckinRecords([]);
+    setCheckinStats({ successful: 0, duplicates: 0, errors: 0 });
+    setCheckinData('');
+  };
+
+  const getQRCodeUrl = (registrationId: string) => {
+    if (!selectedEventForRegistrations) return '';
+    const registration = registrations.find(r => r.$id === registrationId);
+    if (!registration) return '';
+    const ticketData = `TICKET|${registrationId}|${registration.userName}|${selectedEventForRegistrations.title}`;
+    const encoded = encodeURIComponent(ticketData);
+    return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encoded}`;
+  };
+
+  const downloadTicketQR = async (registrationId: string) => {
+    const qrUrl = getQRCodeUrl(registrationId);
+    if (!qrUrl) return;
+    
+    try {
+      const response = await fetch(qrUrl);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const registration = registrations.find(r => r.$id === registrationId);
+      a.download = `${registration?.userName || 'ticket'}-qr.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading QR code:', error);
+      alert('Failed to download QR code');
+    }
   };
 
   const handleDeletePastEvents = async () => {
@@ -1055,14 +1174,32 @@ export default function AdminEventsPage() {
       <Modal 
         isOpen={isRegistrationsOpen} 
         onClose={onRegistrationsClose} 
-        size="2xl"
+        size="4xl"
         scrollBehavior="inside"
+        classNames={{
+          base: "max-h-[95vh]",
+          wrapper: "items-center"
+        }}
       >
         <ModalContent>
-          <ModalHeader className="flex flex-col gap-1">
-            <div className="flex items-center gap-2">
-              <UsersIcon className="w-5 h-5" />
-              <span>Event Registrations</span>
+          <ModalHeader className="flex flex-col gap-1 border-b pb-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <UsersIcon className="w-5 h-5" />
+                <span>Event Registrations</span>
+              </div>
+              {!checkinMode && registrations.length > 0 && (
+                <Button
+                  size="sm"
+                  color="success"
+                  variant="flat"
+                  onPress={() => setCheckinMode(true)}
+                >
+                  <QrCode className="w-4 h-4" />
+                  <span className="ml-2 hidden sm:inline">Start Check-In</span>
+                  <span className="ml-2 sm:hidden">Check-In</span>
+                </Button>
+              )}
             </div>
             {selectedEventForRegistrations && (
               <p className="text-sm text-default-500 font-normal">
@@ -1070,31 +1207,112 @@ export default function AdminEventsPage() {
               </p>
             )}
           </ModalHeader>
+          
           <ModalBody>
             {loadingRegistrations ? (
               <div className="flex justify-center items-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
               </div>
-            ) : registrations.length > 0 ? (
-              <div className="max-h-96 overflow-y-auto">
-                <Table aria-label="Registrations table" isStriped>
-                  <TableHeader>
-                    <TableColumn>NAME</TableColumn>
-                    <TableColumn>EMAIL</TableColumn>
-                    <TableColumn className="hidden sm:table-cell">REGISTERED AT</TableColumn>
-                  </TableHeader>
-                  <TableBody>
-                    {registrations.map((reg) => (
-                      <TableRow key={reg.$id}>
-                        <TableCell>{reg.userName}</TableCell>
-                        <TableCell className="text-sm">{reg.userEmail}</TableCell>
-                        <TableCell className="hidden sm:table-cell text-xs">
-                          {new Date(reg.registeredAt).toLocaleDateString()}
-                        </TableCell>
-                      </TableRow>
+            ) : checkinMode ? (
+              // Check-in View
+              <div className="space-y-6">
+                {/* Check-in Stats */}
+                <div className="grid grid-cols-3 gap-3">
+                  <Card className="bg-success/10 border border-success/20">
+                    <CardBody className="p-3">
+                      <p className="text-xs text-default-600">Checked In</p>
+                      <p className="text-2xl font-bold text-success">{checkinStats.successful}</p>
+                    </CardBody>
+                  </Card>
+                  <Card className="bg-warning/10 border border-warning/20">
+                    <CardBody className="p-3">
+                      <p className="text-xs text-default-600">Duplicates</p>
+                      <p className="text-2xl font-bold text-warning">{checkinStats.duplicates}</p>
+                    </CardBody>
+                  </Card>
+                  <Card className="bg-danger/10 border border-danger/20">
+                    <CardBody className="p-3">
+                      <p className="text-xs text-default-600">Errors</p>
+                      <p className="text-2xl font-bold text-danger">{checkinStats.errors}</p>
+                    </CardBody>
+                  </Card>
+                </div>
+
+                {/* QR Input */}
+                <div>
+                  <Input
+                    autoFocus
+                    placeholder="Scan QR code here..."
+                    value={checkinData}
+                    onKeyDown={handleCheckinScan}
+                    onChange={(e) => setCheckinData(e.target.value)}
+                    className="text-lg"
+                  />
+                  <p className="text-xs text-default-500 mt-2">Point scanner at QR codes to check-in attendees</p>
+                </div>
+
+                {/* Check-in Records */}
+                {checkinRecords.length > 0 && (
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    <p className="text-sm font-semibold">Recent Scans</p>
+                    {checkinRecords.map((record, idx) => (
+                      <div key={idx} className="flex items-center gap-3 p-3 bg-default-100 dark:bg-default-50/10 rounded-lg">
+                        {record.status === 'success' && <div className="w-2 h-2 rounded-full bg-success flex-shrink-0" />}
+                        {record.status === 'duplicate' && <div className="w-2 h-2 rounded-full bg-warning flex-shrink-0" />}
+                        {record.status === 'error' && <div className="w-2 h-2 rounded-full bg-danger flex-shrink-0" />}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{record.name}</p>
+                          <p className="text-xs text-default-500 truncate">{record.email}</p>
+                        </div>
+                        <div className="text-xs text-default-400 flex-shrink-0">{record.time}</div>
+                      </div>
                     ))}
-                  </TableBody>
-                </Table>
+                  </div>
+                )}
+              </div>
+            ) : registrations.length > 0 ? (
+              // Normal Registration View with QR Codes
+              <div className="max-h-[60vh] overflow-y-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {registrations.map((reg) => (
+                    <Card key={reg.$id} className="border-default-200">
+                      <CardBody className="p-4 space-y-3">
+                        <div>
+                          <p className="text-sm font-semibold text-default-700">{reg.userName}</p>
+                          <p className="text-xs text-default-500">{reg.userEmail}</p>
+                          <p className="text-xs text-default-400 mt-1">
+                            Registered: {new Date(reg.registeredAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        
+                        {/* QR Code Display */}
+                        {reg.$id && (
+                          <>
+                            <div className="flex justify-center p-2 bg-default-100 rounded-lg">
+                              <img
+                                src={getQRCodeUrl(reg.$id)}
+                                alt={`QR for ${reg.userName}`}
+                                className="w-24 h-24"
+                              />
+                            </div>
+
+                            {/* Download QR Button */}
+                            <Button
+                              size="sm"
+                              variant="flat"
+                              color="primary"
+                              fullWidth
+                              onPress={() => downloadTicketQR(reg.$id!)}
+                            >
+                              <Download className="w-4 h-4" />
+                              <span className="ml-2">Download QR</span>
+                            </Button>
+                          </>
+                        )}
+                      </CardBody>
+                    </Card>
+                  ))}
+                </div>
               </div>
             ) : (
               <div className="flex justify-center items-center py-8 text-default-500">
@@ -1102,10 +1320,35 @@ export default function AdminEventsPage() {
               </div>
             )}
           </ModalBody>
-          <ModalFooter>
-            <Button variant="light" onPress={onRegistrationsClose}>
-              Close
-            </Button>
+
+          <ModalFooter className="border-t pt-4">
+            {checkinMode ? (
+              <>
+                <Button 
+                  variant="flat" 
+                  onPress={() => {
+                    setCheckinMode(false);
+                    handleResetCheckin();
+                  }}
+                >
+                  Back
+                </Button>
+                <Button 
+                  color="danger" 
+                  variant="flat" 
+                  onPress={handleResetCheckin}
+                >
+                  Reset
+                </Button>
+              </>
+            ) : (
+              <Button 
+                variant="light" 
+                onPress={onRegistrationsClose}
+              >
+                Close
+              </Button>
+            )}
           </ModalFooter>
         </ModalContent>
       </Modal>
