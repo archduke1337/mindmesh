@@ -23,7 +23,9 @@ export default function CheckInPage() {
 
   useEffect(() => {
     // Focus input on load
-    inputRef.current?.focus();
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
   }, []);
 
   const parseQRCode = (data: string) => {
@@ -175,7 +177,7 @@ export default function CheckInPage() {
               ref={inputRef}
               placeholder="Point camera at QR code and press Enter..."
               value={qrData}
-              onChange={(e) => setQrData(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQrData(e.target.value)}
               onKeyDown={handleQRScan}
               size="lg"
               startContent={<Camera className="w-5 h-5 text-default-400" />}
