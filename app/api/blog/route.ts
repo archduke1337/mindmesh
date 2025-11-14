@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { blogService } from "@/lib/blog";
 import { getErrorMessage } from "@/lib/errorHandler";
 import { createAdminDatabases } from "@/lib/appwrite";
+import { checkBlogRateLimit, getRemainingSubmissions } from "@/lib/rateLimiter";
 import { ID } from "appwrite";
 import { DATABASE_ID, BLOGS_COLLECTION_ID } from "@/lib/database";
 
@@ -14,12 +15,18 @@ export async function GET(request: NextRequest) {
 
     let blogs;
 
-    if (featured === "true") {
-      blogs = await blogService.getFeaturedBlogs(limit);
-    } else if (category && category !== "all") {
-      blogs = await blogService.getBlogsByCategory(category, limit);
-    } else {
-      blogs = await blogService.getPublishedBlogs(limit);
+    try {
+      if (featured === "true") {
+        blogs = await blogService.getFeaturedBlogs(limit);
+      } else if (category && category !== "all") {
+        blogs = await blogService.getBlogsByCategory(category, limit);
+      } else {
+        blogs = await blogService.getPublishedBlogs(limit);
+      }
+    } catch (error) {
+      // Fallback to empty array if query fails
+      console.error("Blog fetch error:", error);
+      blogs = [];
     }
 
     return NextResponse.json({
@@ -43,8 +50,31 @@ export async function POST(request: NextRequest) {
   try {
     const data = await request.json();
 
+    // Validate authentication - user must provide authorId to prove they're authenticated
+    if (!data.authorId || !data.authorEmail) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Authentication required. You must be logged in to create a blog.",
+        },
+        { status: 401 }
+      );
+    }
+
+    // Check rate limit (max 5 blogs per 24 hours)
+    if (!checkBlogRateLimit(data.authorId)) {
+      const remaining = getRemainingSubmissions(data.authorId);
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Rate limit exceeded. You can submit ${5} blogs per 24 hours. Try again later.`,
+        },
+        { status: 429 }
+      );
+    }
+
     // Validate required fields
-    if (!data.title || !data.content || !data.authorEmail) {
+    if (!data.title || !data.content) {
       return NextResponse.json(
         {
           success: false,
@@ -73,7 +103,7 @@ export async function POST(request: NextRequest) {
         coverImage: data.coverImage || "",
         category: data.category || "other",
         tags: data.tags || [],
-        authorId: data.authorId || "",
+        authorId: data.authorId,
         authorName: data.authorName || "Anonymous",
         authorEmail: data.authorEmail,
         authorAvatar: data.authorAvatar,

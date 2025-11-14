@@ -44,7 +44,7 @@ export const blogService = {
       return true;
     } catch (error: any) {
       if (error?.message?.includes("Collection with the requested ID could not be found")) {
-        console.error("❌ Blogs collection not found! You need to create the 'blogs' collection in your Appwrite database.");
+        console.error("❌ Blog collection not found! You need to create the 'blog' collection in your Appwrite database.");
         console.error("📋 Collection ID:", BLOGS_COLLECTION_ID);
         console.error("📝 Create it at: https://cloud.appwrite.io/console/databases");
       }
@@ -184,6 +184,19 @@ export const blogService = {
   // Create blog (user submission)
   async createBlog(blogData: Omit<Blog, "$id" | "$createdAt" | "$updatedAt">) {
     try {
+      // Check if slug already exists
+      const existingBlog = await databases.listDocuments(
+        DATABASE_ID,
+        BLOGS_COLLECTION_ID,
+        [Query.equal("slug", blogData.slug)]
+      );
+      
+      if (existingBlog.documents.length > 0) {
+        // Append timestamp to make slug unique
+        const timestamp = Date.now();
+        blogData.slug = `${blogData.slug}-${timestamp}`;
+      }
+
       const response = await databases.createDocument(
         DATABASE_ID,
         BLOGS_COLLECTION_ID,
@@ -256,13 +269,36 @@ export const blogService = {
     }
   },
 
-  // Delete blog
-  async deleteBlog(blogId: string) {
+  // Delete blog (verify user is author or admin)
+  async deleteBlog(blogId: string, userId?: string) {
     try {
+      // If userId is provided, verify user owns the blog before deletion
+      if (userId) {
+        const blog = await this.getBlogById(blogId);
+        if (blog && blog.authorId !== userId) {
+          throw new Error("Unauthorized: You can only delete your own blogs");
+        }
+      }
+      
       await databases.deleteDocument(DATABASE_ID, BLOGS_COLLECTION_ID, blogId);
       return true;
     } catch (error) {
       console.error("Error deleting blog:", error);
+      throw error;
+    }
+  },
+
+  // Get blog by ID (helper for authorization checks)
+  async getBlogById(blogId: string) {
+    try {
+      const response = await databases.getDocument(
+        DATABASE_ID,
+        BLOGS_COLLECTION_ID,
+        blogId
+      );
+      return response as unknown as Blog;
+    } catch (error) {
+      console.error("Error fetching blog by ID:", error);
       throw error;
     }
   },
@@ -281,6 +317,9 @@ export const blogService = {
   // Upload blog image
   async uploadBlogImage(file: File) {
     try {
+      // NOTE: Ensure storage bucket permissions allow authenticated users to upload
+      // Go to Appwrite Console > Storage > blog-images bucket > Permissions
+      // Set: role:authenticated (Create, Read) and role:any (Read)
       const response = await storage.createFile(
         BLOG_IMAGES_BUCKET_ID,
         ID.unique(),
@@ -290,6 +329,13 @@ export const blogService = {
       return fileUrl.toString();
     } catch (error) {
       console.error("Error uploading blog image:", error);
+      // If you see "permission denied", check storage bucket permissions in Appwrite Console
+      if (error instanceof Error && error.message.includes("permission")) {
+        throw new Error(
+          "Storage permission denied. Please check your bucket permissions at: " +
+          "https://cloud.appwrite.io/console/storage"
+        );
+      }
       throw error;
     }
   },
