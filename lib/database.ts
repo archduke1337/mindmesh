@@ -34,9 +34,13 @@ export interface Event {
   isFeatured: boolean;
   isPremium: boolean;
   status?: string; // Made optional
+  isRecurring?: boolean; // New: recurring events flag
+  recurringPattern?: "none" | "weekly" | "monthly" | "quarterly"; // New: recurrence pattern
+  parentEventId?: string; // New: reference to parent if recurring
   $createdAt?: string;
   $updatedAt?: string;
 }
+
 
 // Registration Interface - status is optional
 export interface Registration {

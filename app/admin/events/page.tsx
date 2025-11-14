@@ -15,13 +15,19 @@ import { useRouter } from "next/navigation";
 import { eventService, Event, Registration } from "@/lib/database";
 import { getErrorMessage } from "@/lib/errorHandler";
 import AdminPageWrapper from "@/components/AdminPageWrapper";
-import { PlusIcon, Pencil, Trash2, Image as ImageIcon, CalendarIcon, MapPinIcon, UsersIcon, DollarSignIcon, TagIcon, StarIcon, CrownIcon, TrendingUpIcon, LinkIcon, AlertCircle, XIcon } from "lucide-react";
+import { EVENT_TEMPLATES } from "@/lib/eventTemplates";
+import { calculateEventMetrics, getCapacityAlertMessage, estimateFutureRegistrations } from "@/lib/eventAnalytics";
+import { generateEventQRCodeUrl, generateEventShareQRCodeUrl } from "@/lib/eventQRCode";
+import { downloadEventStatsCSV, downloadRegistrationList } from "@/lib/eventExport";
+import { PlusIcon, Pencil, Trash2, Image as ImageIcon, CalendarIcon, MapPinIcon, UsersIcon, DollarSignIcon, TagIcon, StarIcon, CrownIcon, TrendingUpIcon, LinkIcon, AlertCircle, XIcon, QrCode, Download, Share2 } from "lucide-react";
 
 export default function AdminEventsPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { isOpen: isRegistrationsOpen, onOpen: onRegistrationsOpen, onClose: onRegistrationsClose } = useDisclosure();
+  const { isOpen: isQROpen, onOpen: onQROpen, onClose: onQRClose } = useDisclosure();
+  const { isOpen: isAnalyticsOpen, onOpen: onAnalyticsOpen, onClose: onAnalyticsClose } = useDisclosure();
 
   const [events, setEvents] = useState<Event[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(true);
@@ -31,6 +37,9 @@ export default function AdminEventsPage() {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [loadingRegistrations, setLoadingRegistrations] = useState(false);
   const [selectedEventForRegistrations, setSelectedEventForRegistrations] = useState<Event | null>(null);
+  const [selectedEventForQR, setSelectedEventForQR] = useState<Event | null>(null);
+  const [selectedEventForAnalytics, setSelectedEventForAnalytics] = useState<Event | null>(null);
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState<Partial<Event>>({
@@ -51,7 +60,10 @@ export default function AdminEventsPage() {
     tags: [],
     isFeatured: false,
     isPremium: false,
-    status: "upcoming"
+    status: "upcoming",
+    isRecurring: false,
+    recurringPattern: undefined,
+    parentEventId: undefined
   });
   const [tagInput, setTagInput] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -203,10 +215,36 @@ export default function AdminEventsPage() {
       tags: [],
       isFeatured: false,
       isPremium: false,
-      status: "upcoming"
+      status: "upcoming",
+      isRecurring: false,
+      recurringPattern: undefined,
+      parentEventId: undefined
     });
     setTagInput("");
+    setShowTemplateSelector(false);
     onClose();
+  };
+
+  const handleApplyTemplate = (templateId: string) => {
+    const template = EVENT_TEMPLATES.find(t => t.id === templateId);
+    if (template) {
+      setFormData(prev => ({
+        ...prev,
+        ...template.defaultEvent,
+        title: prev.title || template.defaultEvent.title, // Keep user's title if already entered
+      }));
+      setShowTemplateSelector(false);
+    }
+  };
+
+  const handleViewQRCode = (event: Event) => {
+    setSelectedEventForQR(event);
+    onQROpen();
+  };
+
+  const handleViewAnalytics = async (event: Event) => {
+    setSelectedEventForAnalytics(event);
+    onAnalyticsOpen();
   };
 
   if (loading) {
@@ -395,6 +433,24 @@ export default function AdminEventsPage() {
                           size="sm"
                           variant="light"
                           isIconOnly
+                          title="Analytics"
+                          onPress={() => handleViewAnalytics(event)}
+                        >
+                          <TrendingUpIcon className="w-3 h-3 md:w-4 md:h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="light"
+                          isIconOnly
+                          title="QR Code"
+                          onPress={() => handleViewQRCode(event)}
+                        >
+                          <QrCode className="w-3 h-3 md:w-4 md:h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="light"
+                          isIconOnly
                           title="View registrations"
                           onPress={() => handleViewRegistrations(event)}
                         >
@@ -451,6 +507,56 @@ export default function AdminEventsPage() {
             </ModalHeader>
             
             <ModalBody className="py-6">
+              {!editingEvent && !showTemplateSelector && (
+                <div className="mb-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl border border-purple-200 dark:border-purple-800">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold text-foreground">Quick Start with Templates</h3>
+                      <p className="text-sm text-default-500 mt-1">Use pre-built templates to create events faster</p>
+                    </div>
+                    <Button
+                      color="primary"
+                      size="sm"
+                      onPress={() => setShowTemplateSelector(true)}
+                      variant="flat"
+                    >
+                      Browse Templates
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {showTemplateSelector && (
+                <div className="mb-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl border border-purple-200 dark:border-purple-800">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold text-foreground">Select a Template</h3>
+                    <Button
+                      size="sm"
+                      variant="light"
+                      onPress={() => setShowTemplateSelector(false)}
+                    >
+                      <XIcon className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {EVENT_TEMPLATES.map(template => (
+                      <Button
+                        key={template.id}
+                        className="justify-start h-auto py-3 px-4"
+                        color="primary"
+                        variant="flat"
+                        onPress={() => handleApplyTemplate(template.id)}
+                      >
+                        <div className="flex flex-col items-start gap-1">
+                          <span className="font-semibold">{template.name}</span>
+                          <span className="text-xs text-default-500">{template.description}</span>
+                        </div>
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
               <Tabs aria-label="Event form sections" color="primary" variant="underlined">
                 <Tab key="basic" title={
                   <div className="flex items-center gap-2">
@@ -708,11 +814,58 @@ export default function AdminEventsPage() {
                 <Tab key="organizer" title={
                   <div className="flex items-center gap-2">
                     <UsersIcon className="w-4 h-4" />
-                    <span className="hidden sm:inline">Organizer & Tags</span>
+                    <span className="hidden sm:inline">Organizer & Recurring</span>
                     <span className="sm:hidden">More</span>
                   </div>
                 }>
                   <div className="space-y-6 pt-4">
+                    {/* Recurring Events Section */}
+                    <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+                      <div className="flex items-start justify-between mb-4">
+                        <div>
+                          <h3 className="font-semibold text-foreground flex items-center gap-2">
+                            <CalendarIcon className="w-4 h-4 text-blue-600" />
+                            Recurring Events
+                          </h3>
+                          <p className="text-sm text-default-500 mt-1">Set up recurring events for regular meetups</p>
+                        </div>
+                      </div>
+                      
+                      <Switch
+                        isSelected={formData.isRecurring}
+                        onValueChange={(checked) => handleInputChange("isRecurring", checked)}
+                        color="primary"
+                      >
+                        <span className="text-sm font-medium">Enable recurring</span>
+                      </Switch>
+
+                      {formData.isRecurring && (
+                        <div className="mt-4 space-y-3">
+                          <Select
+                            label="Repeat Pattern"
+                            placeholder="Select a pattern"
+                            selectedKeys={formData.recurringPattern ? [formData.recurringPattern] : []}
+                            onChange={(e) => handleInputChange("recurringPattern", e.target.value)}
+                            classNames={{
+                              label: "font-semibold text-sm"
+                            }}
+                          >
+                            <SelectItem key="weekly">Every Week</SelectItem>
+                            <SelectItem key="biweekly">Every 2 Weeks</SelectItem>
+                            <SelectItem key="monthly">Every Month</SelectItem>
+                            <SelectItem key="quarterly">Every Quarter</SelectItem>
+                          </Select>
+                          <div className="p-3 bg-blue-100/50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-800">
+                            <p className="text-xs text-blue-700 dark:text-blue-300">
+                              💡 Recurring events will be automatically created based on the pattern. You can edit individual events later.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <hr className="my-2" />
+
                     <Input
                       label="Organizer Name"
                       placeholder="e.g., John Doe"
@@ -889,6 +1042,211 @@ export default function AdminEventsPage() {
           </ModalBody>
           <ModalFooter>
             <Button variant="light" onPress={onRegistrationsClose}>
+              Close
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* QR Code Modal */}
+      <Modal 
+        isOpen={isQROpen} 
+        onClose={onQRClose} 
+        size="lg"
+      >
+        <ModalContent>
+          <ModalHeader className="flex items-center gap-2">
+            <QrCode className="w-5 h-5" />
+            <span>QR Codes for {selectedEventForQR?.title}</span>
+          </ModalHeader>
+          
+          <ModalBody className="py-6 space-y-6">
+            {selectedEventForQR && (
+              <>
+                <div>
+                  <h3 className="font-semibold text-foreground mb-3">Check-in QR Code</h3>
+                  <div className="flex justify-center p-4 bg-default-100 rounded-xl">
+                    <img
+                      src={generateEventQRCodeUrl(selectedEventForQR.$id!, selectedEventForQR.title)}
+                      alt="Check-in QR"
+                      className="w-48 h-48"
+                    />
+                  </div>
+                  <p className="text-xs text-default-500 text-center mt-2">
+                    Use this QR code for venue check-ins
+                  </p>
+                  <Button
+                    fullWidth
+                    color="primary"
+                    variant="flat"
+                    className="mt-3"
+                    onPress={() => {
+                      const link = document.createElement('a');
+                      link.href = generateEventQRCodeUrl(selectedEventForQR.$id!, selectedEventForQR.title);
+                      link.download = `${selectedEventForQR.title}-checkin-qr.png`;
+                      link.click();
+                    }}
+                  >
+                    <Download className="w-4 h-4" />
+                    Download Check-in QR
+                  </Button>
+                </div>
+
+                <hr />
+
+                <div>
+                  <h3 className="font-semibold text-foreground mb-3">Shareable QR Code</h3>
+                  <div className="flex justify-center p-4 bg-default-100 rounded-xl">
+                    <img
+                      src={generateEventShareQRCodeUrl(selectedEventForQR.$id!)}
+                      alt="Share QR"
+                      className="w-48 h-48"
+                    />
+                  </div>
+                  <p className="text-xs text-default-500 text-center mt-2">
+                    Share this QR code to drive registrations
+                  </p>
+                  <Button
+                    fullWidth
+                    color="success"
+                    variant="flat"
+                    className="mt-3"
+                    onPress={() => {
+                      const link = document.createElement('a');
+                      link.href = generateEventShareQRCodeUrl(selectedEventForQR.$id!);
+                      link.download = `${selectedEventForQR.title}-share-qr.png`;
+                      link.click();
+                    }}
+                  >
+                    <Download className="w-4 h-4" />
+                    Download Share QR
+                  </Button>
+                </div>
+              </>
+            )}
+          </ModalBody>
+          
+          <ModalFooter>
+            <Button variant="light" onPress={onQRClose}>
+              Close
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Analytics Modal */}
+      <Modal 
+        isOpen={isAnalyticsOpen} 
+        onClose={onAnalyticsClose} 
+        size="2xl"
+        scrollBehavior="inside"
+      >
+        <ModalContent>
+          <ModalHeader className="flex items-center gap-2">
+            <TrendingUpIcon className="w-5 h-5" />
+            <span>Event Analytics - {selectedEventForAnalytics?.title}</span>
+          </ModalHeader>
+          
+          <ModalBody className="py-6">
+            {selectedEventForAnalytics && (
+              <div className="space-y-6">
+                {(() => {
+                  const metrics = calculateEventMetrics(selectedEventForAnalytics);
+                  const estimatedFuture = estimateFutureRegistrations(selectedEventForAnalytics.registered, 7);
+                  const alertMsg = getCapacityAlertMessage(metrics);
+                  
+                  return (
+                    <>
+                      {/* Capacity Alert */}
+                      {alertMsg && (
+                        <div className="p-4 bg-warning-50 dark:bg-warning-900/20 rounded-xl border border-warning-200 dark:border-warning-800">
+                          <div className="flex items-center gap-2 mb-2">
+                            <AlertCircle className="w-5 h-5 text-warning-600" />
+                            <span className="font-semibold text-warning-900 dark:text-warning-100">Capacity Alert</span>
+                          </div>
+                          <p className="text-sm text-warning-700 dark:text-warning-300">{alertMsg}</p>
+                        </div>
+                      )}
+
+                      {/* Metrics Grid */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <Card className="border-none shadow-sm">
+                          <CardBody className="p-4">
+                            <p className="text-xs text-default-500 uppercase tracking-wide font-semibold">Registered</p>
+                            <p className="text-2xl font-bold mt-1">{selectedEventForAnalytics.registered}</p>
+                            <p className="text-xs text-default-400 mt-1">{metrics.registrationPercentage}% full</p>
+                          </CardBody>
+                        </Card>
+
+                        <Card className="border-none shadow-sm">
+                          <CardBody className="p-4">
+                            <p className="text-xs text-default-500 uppercase tracking-wide font-semibold">Capacity</p>
+                            <p className="text-2xl font-bold mt-1">{selectedEventForAnalytics.capacity}</p>
+                            <p className="text-xs text-default-400 mt-1">{metrics.spotsRemaining} spots left</p>
+                          </CardBody>
+                        </Card>
+
+                        <Card className="border-none shadow-sm">
+                          <CardBody className="p-4">
+                            <p className="text-xs text-default-500 uppercase tracking-wide font-semibold">Estimated (7d)</p>
+                            <p className="text-2xl font-bold mt-1">{estimatedFuture}</p>
+                            <p className="text-xs text-default-400 mt-1">
+                              +{Math.round(estimatedFuture - selectedEventForAnalytics.registered)} projected
+                            </p>
+                          </CardBody>
+                        </Card>
+
+                        <Card className="border-none shadow-sm">
+                          <CardBody className="p-4">
+                            <p className="text-xs text-default-500 uppercase tracking-wide font-semibold">Status</p>
+                            <p className="text-2xl font-bold mt-1">
+                              <Chip
+                                color={metrics.isFull ? "danger" : metrics.isNearFull ? "warning" : "success"}
+                                variant="flat"
+                                size="sm"
+                              >
+                                {metrics.isFull ? "Full" : metrics.isNearFull ? "Filling" : "Open"}
+                              </Chip>
+                            </p>
+                          </CardBody>
+                        </Card>
+                      </div>
+
+                      {/* Export Options */}
+                      <div className="space-y-2">
+                        <p className="text-sm font-semibold text-default-600">Export Data</p>
+                        <div className="flex gap-2">
+                          <Button
+                            fullWidth
+                            color="primary"
+                            variant="flat"
+                            size="sm"
+                            onPress={() => downloadEventStatsCSV(selectedEventForAnalytics, metrics, [])}
+                          >
+                            <Download className="w-4 h-4" />
+                            Stats CSV
+                          </Button>
+                          <Button
+                            fullWidth
+                            color="secondary"
+                            variant="flat"
+                            size="sm"
+                            onPress={() => downloadRegistrationList([], selectedEventForAnalytics)}
+                          >
+                            <Download className="w-4 h-4" />
+                            Registrations
+                          </Button>
+                        </div>
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+            )}
+          </ModalBody>
+          
+          <ModalFooter>
+            <Button variant="light" onPress={onAnalyticsClose}>
               Close
             </Button>
           </ModalFooter>
