@@ -101,14 +101,81 @@ export default function AdminEventsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validation
-    if (!formData.image || !formData.image.startsWith('http')) {
-      alert("Please enter a valid image URL (must start with http:// or https://)");
-      return;
+    // Enhanced Validation
+    const errors: string[] = [];
+
+    // Image validation
+    if (!formData.image || !formData.image.trim()) {
+      errors.push("Event image URL is required");
+    } else if (!formData.image.startsWith('http')) {
+      errors.push("Event image URL must start with http:// or https://");
     }
 
-    if (!formData.organizerAvatar || !formData.organizerAvatar.startsWith('http')) {
-      alert("Please enter a valid organizer avatar URL (must start with http:// or https://)");
+    // Organizer avatar validation
+    if (!formData.organizerAvatar || !formData.organizerAvatar.trim()) {
+      errors.push("Organizer avatar URL is required");
+    } else if (!formData.organizerAvatar.startsWith('http')) {
+      errors.push("Organizer avatar URL must start with http:// or https://");
+    }
+
+    // Title validation
+    if (!formData.title || formData.title.trim().length < 3) {
+      errors.push("Event title must be at least 3 characters long");
+    }
+
+    // Description validation
+    if (!formData.description || formData.description.trim().length < 10) {
+      errors.push("Event description must be at least 10 characters long");
+    }
+
+    // Date validation
+    if (!formData.date) {
+      errors.push("Event date is required");
+    } else {
+      const eventDate = new Date(formData.date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (eventDate < today) {
+        errors.push("Event date cannot be in the past");
+      }
+    }
+
+    // Venue and location validation
+    if (!formData.venue || formData.venue.trim().length < 3) {
+      errors.push("Venue name must be at least 3 characters long");
+    }
+
+    if (!formData.location || formData.location.trim().length < 3) {
+      errors.push("Location must be at least 3 characters long");
+    }
+
+    // Price validation
+    if (formData.price < 0) {
+      errors.push("Price cannot be negative");
+    }
+
+    if (formData.discountPrice !== null && formData.discountPrice !== undefined) {
+      if (formData.discountPrice < 0) {
+        errors.push("Discount price cannot be negative");
+      }
+      if (formData.discountPrice >= formData.price) {
+        errors.push("Discount price must be less than regular price");
+      }
+    }
+
+    // Capacity validation
+    if (formData.capacity <= 0) {
+      errors.push("Capacity must be greater than 0");
+    }
+
+    // Organizer name validation
+    if (!formData.organizerName || formData.organizerName.trim().length < 2) {
+      errors.push("Organizer name must be at least 2 characters long");
+    }
+
+    // Display errors if any
+    if (errors.length > 0) {
+      alert("Please fix the following errors:\n\n" + errors.map((err, i) => `${i + 1}. ${err}`).join("\n"));
       return;
     }
 

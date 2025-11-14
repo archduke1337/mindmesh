@@ -9,6 +9,7 @@ import { Chip } from "@heroui/chip";
 import { Progress } from "@heroui/progress";
 import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
+import { Pagination } from "@heroui/pagination";
 import { title, subtitle } from "@/components/primitives";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -16,6 +17,9 @@ import { useAuth } from "@/context/AuthContext";
 import { eventService, type Event as EventType } from "@/lib/database";
 import { getErrorMessage } from "@/lib/errorHandler";
 import { sendRegistrationEmail } from "@/lib/emailService";
+import { usePagination } from "@/lib/hooks/usePagination";
+import LazyImage from "@/components/LazyImage";
+import { EventCardSkeletonGrid } from "@/components/EventCardSkeleton";
 import {
   CalendarIcon,
   MapPinIcon,
@@ -30,7 +34,9 @@ import {
   CrownIcon,
   ZapIcon,
   TrendingUpIcon,
-  ArrowRightIcon
+  ArrowRightIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon
 } from "lucide-react";
 
 export default function EventsPage() {
@@ -139,6 +145,25 @@ export default function EventsPage() {
           return 0;
       }
     });
+
+  // Add pagination
+  const {
+    currentPage,
+    totalPages,
+    paginatedItems: paginatedEvents,
+    goToPage,
+    nextPage,
+    prevPage,
+    canGoNext,
+    canGoPrev,
+    startIndex,
+    endIndex,
+    totalItems
+  } = usePagination({
+    items: filteredEvents,
+    itemsPerPage: 12,
+    initialPage: 1
+  });
 
   const toggleSaveEvent = (e: React.MouseEvent, eventId: string) => {
     e.stopPropagation();
@@ -270,10 +295,35 @@ export default function EventsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto" />
-          <p className="mt-4 text-default-500">Loading events...</p>
+      <div className="space-y-8 sm:space-y-10 md:space-y-12 pb-12 sm:pb-16 md:pb-20">
+        {/* Hero Section */}
+        <div className="text-center space-y-4 sm:space-y-5 md:space-y-6 relative py-8 sm:py-10 md:py-12 px-3 sm:px-4 md:px-6">
+          <div className="absolute top-0 left-1/4 w-64 sm:w-80 md:w-96 h-64 sm:h-80 md:h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute top-12 sm:top-16 md:top-20 right-1/4 w-64 sm:w-80 md:w-96 h-64 sm:h-80 md:h-96 bg-pink-500/20 rounded-full blur-3xl animate-pulse" />
+          <div className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 mb-4 sm:mb-5 md:mb-6">
+            <SparklesIcon className="w-4 sm:w-4.5 md:w-5 h-4 sm:h-4.5 md:h-5 text-purple-500" />
+            <span className="text-xs sm:text-sm font-semibold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              Upcoming Events
+            </span>
+          </div>
+          <div className="relative z-10">
+            <h1 className={title({ size: "lg" })}>
+              Discover{" "}
+              <span className={title({ color: "violet", size: "lg" })}>
+                Amazing Events
+              </span>
+            </h1>
+            <p className={subtitle({ class: "mt-4 sm:mt-5 md:mt-6 max-w-3xl mx-auto text-base sm:text-lg md:text-xl" })}>
+              Join our community events, workshops, and conferences to learn, network, and grow together
+            </p>
+          </div>
+        </div>
+
+        {/* Events Grid with Skeletons */}
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
+            <EventCardSkeletonGrid count={12} />
+          </div>
         </div>
       </div>
     );
@@ -361,8 +411,15 @@ export default function EventsPage() {
 
       {/* Events Grid */}
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 w-full">
+        {/* Pagination info */}
+        {totalItems > 0 && (
+          <div className="mb-4 text-sm text-default-500">
+            Showing {startIndex}-{endIndex} of {totalItems} events
+          </div>
+        )}
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
-          {filteredEvents.map((event) => (
+          {paginatedEvents.map((event) => (
             <Card
               key={event.$id}
               className="border-none hover:shadow-2xl transition-all duration-300 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl group cursor-pointer"
@@ -372,7 +429,7 @@ export default function EventsPage() {
             >
               <CardBody className="p-0 overflow-hidden">
                 <div className="relative">
-                  <img
+                  <LazyImage
                     src={event.image}
                     alt={event.title}
                     className="w-full h-40 sm:h-44 md:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
@@ -535,6 +592,47 @@ export default function EventsPage() {
             <p className="text-xs sm:text-sm text-default-500">
               Try adjusting your search or filter criteria
             </p>
+          </div>
+        )}
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8">
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant="flat"
+                isDisabled={!canGoPrev}
+                onPress={prevPage}
+                startContent={<ChevronLeftIcon className="w-4 h-4" />}
+              >
+                Previous
+              </Button>
+              <Button
+                size="sm"
+                variant="flat"
+                isDisabled={!canGoNext}
+                onPress={nextPage}
+                endContent={<ChevronRightIcon className="w-4 h-4" />}
+              >
+                Next
+              </Button>
+            </div>
+
+            {/* Pagination component */}
+            <Pagination
+              total={totalPages}
+              page={currentPage}
+              onChange={goToPage}
+              showControls
+              classNames={{
+                cursor: "bg-gradient-to-r from-purple-600 to-pink-600 text-white"
+              }}
+            />
+
+            <div className="text-sm text-default-500">
+              Page {currentPage} of {totalPages}
+            </div>
           </div>
         )}
       </div>

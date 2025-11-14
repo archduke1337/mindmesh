@@ -2,6 +2,7 @@
 import { ID, Query } from "appwrite";
 import { databases, storage } from "./appwrite";
 import { getErrorMessage } from "./errorHandler";
+import { cache, CACHE_TTL, generateCacheKey } from "./cache";
 
 // Database and Collection IDs
 export const DATABASE_ID = "68ee09da002cce9f7e39";
@@ -114,12 +115,24 @@ export const eventService = {
   // Get all events
   async getAllEvents(queries: string[] = []) {
     try {
+      const cacheKey = generateCacheKey('events:all', JSON.stringify(queries));
+      const cached = cache.get<Event[]>(cacheKey);
+      
+      if (cached) {
+        console.log('✅ Events loaded from cache');
+        return cached;
+      }
+
       const response = await databases.listDocuments(
         DATABASE_ID,
         EVENTS_COLLECTION_ID,
         queries
       );
-      return response.documents as unknown as Event[];
+      
+      const events = response.documents as unknown as Event[];
+      cache.set(cacheKey, events, CACHE_TTL.MEDIUM);
+      
+      return events;
     } catch (error) {
       console.error("Error fetching events:", error);
       throw error;
@@ -129,6 +142,14 @@ export const eventService = {
   // Get upcoming events (filter by date instead of status)
   async getUpcomingEvents() {
     try {
+      const cacheKey = generateCacheKey('events:upcoming');
+      const cached = cache.get<Event[]>(cacheKey);
+      
+      if (cached) {
+        console.log('✅ Upcoming events loaded from cache:', cached.length);
+        return cached;
+      }
+
       const response = await databases.listDocuments(
         DATABASE_ID,
         EVENTS_COLLECTION_ID,
@@ -138,8 +159,11 @@ export const eventService = {
         ]
       );
       
-      console.log('📋 Loaded events from database:', response.documents.length);
-      return response.documents as unknown as Event[];
+      const events = response.documents as unknown as Event[];
+      cache.set(cacheKey, events, CACHE_TTL.MEDIUM);
+      
+      console.log('📋 Loaded events from database:', events.length);
+      return events;
     } catch (error) {
       console.error("Error fetching upcoming events:", error);
       throw error;
@@ -149,12 +173,24 @@ export const eventService = {
   // Get event by ID
   async getEventById(eventId: string) {
     try {
+      const cacheKey = generateCacheKey('events:id', eventId);
+      const cached = cache.get<Event>(cacheKey);
+      
+      if (cached) {
+        console.log('✅ Event loaded from cache:', eventId);
+        return cached;
+      }
+
       const response = await databases.getDocument(
         DATABASE_ID,
         EVENTS_COLLECTION_ID,
         eventId
       );
-      return response as unknown as Event;
+      
+      const event = response as unknown as Event;
+      cache.set(cacheKey, event, CACHE_TTL.MEDIUM);
+      
+      return event;
     } catch (error) {
       console.error("Error fetching event:", error);
       throw error;
@@ -176,6 +212,10 @@ export const eventService = {
         ID.unique(),
         dataWithStatus
       );
+      
+      // Invalidate all events cache
+      cache.invalidatePattern('events:');
+      
       return response as unknown as Event;
     } catch (error) {
       console.error("Error creating event:", error);
@@ -198,6 +238,10 @@ export const eventService = {
         eventId,
         dataWithStatus
       );
+      
+      // Invalidate all events cache
+      cache.invalidatePattern('events:');
+      
       return response as unknown as Event;
     } catch (error) {
       console.error("Error updating event:", error);
@@ -213,6 +257,10 @@ export const eventService = {
         EVENTS_COLLECTION_ID,
         eventId
       );
+      
+      // Invalidate all events cache
+      cache.invalidatePattern('events:');
+      
       return true;
     } catch (error) {
       console.error("Error deleting event:", error);
@@ -235,6 +283,10 @@ export const eventService = {
       );
 
       await Promise.all(deletePromises);
+      
+      // Invalidate all events cache
+      cache.invalidatePattern('events:');
+      
       return response.documents.length;
     } catch (error) {
       console.error("Error deleting past events:", error);
@@ -309,6 +361,9 @@ export const eventService = {
       await this.updateEvent(eventId, {
         registered: event.registered + 1
       });
+
+      // Invalidate events cache since registered count changed
+      cache.invalidatePattern('events:');
 
       return registration as unknown as Registration;
     } catch (error) {
