@@ -50,12 +50,30 @@ export async function POST(request: NextRequest): Promise<NextResponse<RegisterR
     // Use Appwrite REST API directly with API key for admin access
     const endpoint = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!;
     const projectId = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!;
-    const apiKey = process.env.APPWRITE_API_KEY!;
+    const apiKey = process.env.APPWRITE_API_KEY;
+    
+    if (!apiKey) {
+      console.error('[API] APPWRITE_API_KEY is not set');
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Server configuration error',
+          error: 'API key not configured',
+        },
+        { status: 500 }
+      );
+    }
+
     const databaseId = DATABASE_ID;
     const registrationsCollectionId = REGISTRATIONS_COLLECTION_ID;
 
-    // Check if already registered using REST API
-    const listUrl = `${endpoint}/v1/databases/${databaseId}/collections/${registrationsCollectionId}/documents?queries[]=equal("eventId","${eventId}")&queries[]=equal("userId","${userId}")`;
+    // Check if already registered using REST API with proper query encoding
+    const queries = [
+      `equal("eventId","${eventId}")`,
+      `equal("userId","${userId}")`
+    ];
+    const queryString = queries.map((q, i) => `queries[${i}]=${encodeURIComponent(q)}`).join('&');
+    const listUrl = `${endpoint}/v1/databases/${databaseId}/collections/${registrationsCollectionId}/documents?${queryString}`;
     
     const listResponse = await fetch(listUrl, {
       method: 'GET',
@@ -67,6 +85,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<RegisterR
     });
 
     if (!listResponse.ok) {
+      const errorData = await listResponse.json().catch(() => ({}));
+      console.error('[API] Check registrations failed:', listResponse.status, errorData);
       throw new Error(`Failed to check existing registrations: ${listResponse.statusText}`);
     }
 
