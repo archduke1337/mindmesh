@@ -60,7 +60,7 @@ export default function EditBlogPage() {
       const blog = await blogService.getBlogById(blogId);
 
       // Verify user owns this blog
-      if (blog.authorId !== user?.$id) {
+      if (blog.userId !== user?.$id) {
         setError("You can only edit your own blogs");
         setTimeout(() => router.push("/Blog"), 2000);
         return;
