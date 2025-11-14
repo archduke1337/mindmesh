@@ -1077,14 +1077,17 @@ export default function TicketsPageContent() {
                       </div>
                       
                       {/* QR Code Data Display */}
-                      {selectedTicket.ticketQRData && (
-                        <div className="w-full bg-white/60 dark:bg-default-900/40 border border-default-300 dark:border-default-700 rounded-lg p-3">
-                          <p className="text-xs font-semibold text-default-700 mb-2">QR Data (Text Format):</p>
-                          <p className="text-xs font-mono text-default-600 dark:text-default-400 break-all leading-relaxed">
-                            {selectedTicket.ticketQRData}
-                          </p>
-                        </div>
-                      )}
+                      {(() => {
+                        const qrData = selectedTicket.ticketQRData || `TICKET|${selectedTicket.ticketId}|${selectedTicket.userName}|${selectedTicket.eventTitle}`;
+                        return (
+                          <div className="w-full bg-white/60 dark:bg-default-900/40 border border-default-300 dark:border-default-700 rounded-lg p-3">
+                            <p className="text-xs font-semibold text-default-700 mb-2">QR Data (Text Format):</p>
+                            <p className="text-xs font-mono text-default-600 dark:text-default-400 break-all leading-relaxed">
+                              {qrData}
+                            </p>
+                          </div>
+                        );
+                      })()}
                       
                       <p className="text-xs text-center text-default-500 max-w-sm">
                         💡 <strong>Tip:</strong> You can take a screenshot, download, or print this QR code and present it at the event.
