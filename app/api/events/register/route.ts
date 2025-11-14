@@ -176,7 +176,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<RegisterR
 
     // Try to send email in the background (don't block if it fails)
     try {
-      await sendRegistrationEmail(userEmail, userName, {
+      await sendRegistrationEmail(userEmail, userName, ticketId, {
         title: eventData.title,
         date: eventData.date,
         time: eventData.time,

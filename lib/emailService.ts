@@ -100,6 +100,7 @@ const sendEmailWithEmailJS = async (
 export const sendRegistrationEmail = async (
   userEmail: string,
   userName: string,
+  ticketId: string,
   eventData: {
     title: string;
     date: string;
@@ -113,8 +114,7 @@ export const sendRegistrationEmail = async (
   }
 ): Promise<{ success: boolean; ticketId: string }> => {
   try {
-    // Generate unique ticket ID and QR code
-    const ticketId = generateTicketId();
+    // Use the provided ticket ID from registration
     const qrCodeUrl = generateQRCode(ticketId, userName, eventData.title);
     const actualPrice = eventData.discountPrice || eventData.price;
 
@@ -154,10 +154,9 @@ export const sendRegistrationEmail = async (
   } catch (error) {
     console.error('❌ Unexpected error in sendRegistrationEmail:', error);
     // Still generate and return a ticket ID even if email fails
-    const fallbackTicketId = generateTicketId();
     return {
       success: false,
-      ticketId: fallbackTicketId,
+      ticketId: ticketId,
     };
   }
 };
