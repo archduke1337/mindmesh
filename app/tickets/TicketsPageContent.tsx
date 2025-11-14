@@ -340,10 +340,26 @@ export default function TicketsPageContent() {
       });
 
       const imgWidth = 210; // A4 width in mm
+      const pageHeight = 297; // A4 height in mm
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       const imgData = canvas.toDataURL("image/png");
 
-      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+      // Handle multi-page PDFs
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      // Add first page
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      // Add additional pages if content exceeds one page
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
       pdf.save(`ticket_${ticket.ticketId}.pdf`);
 
       // Clean up
