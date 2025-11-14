@@ -32,6 +32,9 @@ export default function AdminBlogsPage() {
   const [processingBlog, setProcessingBlog] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   // Rejection modal
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
@@ -46,7 +49,12 @@ export default function AdminBlogsPage() {
 
   useEffect(() => {
     if (!authLoading && user) {
-      loadBlogs();
+      // Check if user is admin
+      const isAdmin = user.email && ["sahilmanecode@gmail.com", "mane50205@gmail.com", "gauravramyadav@gmail.com"].includes(user.email);
+      setIsAuthorized(!!isAdmin);
+      if (isAdmin) {
+        loadBlogs();
+      }
     }
   }, [user, authLoading]);
 
@@ -87,6 +95,7 @@ export default function AdminBlogsPage() {
     }
 
     setFilteredBlogs(filtered);
+    setCurrentPage(1); // Reset to first page when tab changes
   };
 
   const handleApprove = async (blogId: string) => {
@@ -182,6 +191,27 @@ export default function AdminBlogsPage() {
     );
   }
 
+  if (!isAuthorized) {
+    return (
+      <AdminPageWrapper 
+        title="Blog Management" 
+        description="Access Denied"
+      >
+        <Card className="border-l-4 border-danger">
+          <CardBody className="gap-4 p-6">
+            <div className="flex items-start gap-4">
+              <AlertCircle className="w-6 h-6 text-danger flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold text-danger text-lg">Access Denied</p>
+                <p className="text-default-600 mt-2">You do not have permission to access the blog management panel. Only administrators can moderate blogs.</p>
+              </div>
+            </div>
+          </CardBody>
+        </Card>
+      </AdminPageWrapper>
+    );
+  }
+
   return (
     <AdminPageWrapper 
       title="Blog Management" 
@@ -252,7 +282,16 @@ export default function AdminBlogsPage() {
             </CardBody>
           </Card>
         ) : (
-          filteredBlogs.map((blog) => (
+          <>
+            {/* Pagination Info */}
+            <div className="flex justify-between items-center text-sm text-default-500">
+              <span>Showing {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, filteredBlogs.length)} of {filteredBlogs.length}</span>
+            </div>
+
+            {/* Blog Items */}
+            {filteredBlogs
+              .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+              .map((blog) => (
             <Card key={blog.$id} className="border-2">
               <CardBody className="p-4 sm:p-5 md:p-6">
                 <div className="grid md:grid-cols-12 gap-4 md:gap-6">
@@ -409,7 +448,46 @@ export default function AdminBlogsPage() {
                 </div>
               </CardBody>
             </Card>
-          ))
+            ))}
+
+            {/* Pagination Controls */}
+            {Math.ceil(filteredBlogs.length / itemsPerPage) > 1 && (
+              <div className="flex justify-center items-center gap-2 mt-6">
+                <Button
+                  isIconOnly
+                  variant="flat"
+                  size="sm"
+                  onPress={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  isDisabled={currentPage === 1}
+                >
+                  ← Previous
+                </Button>
+                
+                {Array.from({ length: Math.ceil(filteredBlogs.length / itemsPerPage) }).map((_, i) => (
+                  <Button
+                    key={i + 1}
+                    size="sm"
+                    variant={currentPage === i + 1 ? "flat" : "bordered"}
+                    color={currentPage === i + 1 ? "primary" : "default"}
+                    onPress={() => setCurrentPage(i + 1)}
+                    className="min-w-10"
+                  >
+                    {i + 1}
+                  </Button>
+                ))}
+                
+                <Button
+                  isIconOnly
+                  variant="flat"
+                  size="sm"
+                  onPress={() => setCurrentPage(p => Math.min(Math.ceil(filteredBlogs.length / itemsPerPage), p + 1))}
+                  isDisabled={currentPage === Math.ceil(filteredBlogs.length / itemsPerPage)}
+                >
+                  Next →
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
 
