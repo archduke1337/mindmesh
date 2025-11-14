@@ -106,11 +106,26 @@ export function formatEventMetrics(metrics: EventMetrics): {
 /**
  * Estimate future registrations based on current trend
  * Simple linear extrapolation (can be enhanced with ML later)
+ * Supports both Registration array and simple number count
  */
 export function estimateFutureRegistrations(
-  registrations: Registration[],
+  registrationsOrCount: Registration[] | number,
   daysUntilEvent: number
 ): number {
+  // If passed a number, use a conservative 10% growth rate
+  if (typeof registrationsOrCount === 'number') {
+    const currentCount = registrationsOrCount;
+    if (currentCount === 0) return 0;
+    // Assume ~10% weekly growth for simple estimation
+    const weeklyGrowthRate = currentCount * 0.1;
+    const weeksPassed = 1; // Assume 1 week of data
+    const dailyGrowthRate = weeklyGrowthRate / 7;
+    const estimated = currentCount + dailyGrowthRate * daysUntilEvent;
+    return Math.round(Math.max(currentCount, estimated));
+  }
+
+  // Original logic for Registration array
+  const registrations = registrationsOrCount;
   if (registrations.length === 0) return 0;
 
   // Sort by date
