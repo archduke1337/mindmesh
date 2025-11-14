@@ -1221,7 +1221,11 @@ export default function AdminEventsPage() {
                             color="primary"
                             variant="flat"
                             size="sm"
-                            onPress={() => downloadEventStatsCSV(selectedEventForAnalytics, metrics, [])}
+                            onPress={() => {
+                              if (selectedEventForAnalytics) {
+                                downloadEventStatsCSV(selectedEventForAnalytics, metrics, []);
+                              }
+                            }}
                           >
                             <Download className="w-4 h-4" />
                             Stats CSV
@@ -1231,7 +1235,11 @@ export default function AdminEventsPage() {
                             color="secondary"
                             variant="flat"
                             size="sm"
-                            onPress={() => downloadRegistrationList([], selectedEventForAnalytics)}
+                            onPress={() => {
+                              if (selectedEventForAnalytics) {
+                                downloadRegistrationList(selectedEventForAnalytics.title, []);
+                              }
+                            }}
                           >
                             <Download className="w-4 h-4" />
                             Registrations
