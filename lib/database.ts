@@ -302,17 +302,24 @@ export const eventService = {
         throw new Error("Event is full");
       }
 
-      // Create registration document
+      // Generate unique ticket ID
+      const ticketId = ID.unique();
+
+      // Generate QR code data for the ticket
+      const ticketQRData = `TICKET|${ticketId}|${userName}|${event.title}`;
+
+      // Create registration document with QR data
       const registration = await databases.createDocument(
         DATABASE_ID,
         REGISTRATIONS_COLLECTION_ID,
-        ID.unique(),
+        ticketId,
         {
           eventId,
           userId,
           userName,
           userEmail,
           registeredAt: new Date().toISOString(),
+          ticketQRData,
         }
       );
 
