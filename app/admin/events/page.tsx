@@ -1582,7 +1582,7 @@ export default function AdminEventsPage() {
                         variant="flat"
                         color="primary"
                         isIconOnly
-                        onClick={() => {
+                        onPress={() => {
                           const url = generateEventShareQRCodeUrl(selectedEventForQR.$id!);
                           navigator.clipboard.writeText(url);
                         }}
