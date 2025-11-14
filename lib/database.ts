@@ -34,6 +34,7 @@ export interface Event {
   isFeatured: boolean;
   isPremium: boolean;
   status?: string; // Made optional
+  isClosed?: boolean; // New: event closed for registrations
   isRecurring?: boolean; // New: recurring events flag
   recurringPattern?: "none" | "weekly" | "monthly" | "quarterly"; // New: recurrence pattern
   parentEventId?: string; // New: reference to parent if recurring
@@ -296,8 +297,14 @@ export const eventService = {
         throw new Error("Already registered for this event");
       }
 
-      // Get event to check capacity
+      // Get event to check capacity and status
       const event = await this.getEventById(eventId);
+      
+      // Check if event is closed
+      if (event.isClosed) {
+        throw new Error("Event is closed for registrations");
+      }
+      
       if (event.capacity && event.registered >= event.capacity) {
         throw new Error("Event is full");
       }
