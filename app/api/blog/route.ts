@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { blogService } from "@/lib/blog";
 import { getErrorMessage } from "@/lib/errorHandler";
+import { getAdminDatabases } from "@/lib/appwrite";
+import { ID } from "appwrite";
+import { DATABASE_ID, BLOGS_COLLECTION_ID } from "@/lib/database";
 
 export async function GET(request: NextRequest) {
   try {
@@ -55,24 +58,42 @@ export async function POST(request: NextRequest) {
     const slug = blogService.generateSlug(data.title);
     const readTime = blogService.calculateReadTime(data.content);
 
-    const blog = await blogService.createBlog({
-      title: data.title,
-      slug,
-      excerpt: data.excerpt || data.content.substring(0, 150),
-      content: data.content,
-      coverImage: data.coverImage || "",
-      category: data.category || "other",
-      tags: data.tags || [],
-      authorId: data.authorId || "",
-      authorName: data.authorName || "Anonymous",
-      authorEmail: data.authorEmail,
-      authorAvatar: data.authorAvatar,
-      status: "pending",
-      views: 0,
-      likes: 0,
-      featured: false,
-      readTime,
-    });
+    // Use admin client for server-side database operations
+    const adminDatabases = getAdminDatabases();
+    
+    if (!adminDatabases) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Server configuration error",
+        },
+        { status: 500 }
+      );
+    }
+
+    const blog = await adminDatabases!.createDocument(
+      DATABASE_ID,
+      BLOGS_COLLECTION_ID,
+      ID.unique(),
+      {
+        title: data.title,
+        slug,
+        excerpt: data.excerpt || data.content.substring(0, 150),
+        content: data.content,
+        coverImage: data.coverImage || "",
+        category: data.category || "other",
+        tags: data.tags || [],
+        authorId: data.authorId || "",
+        authorName: data.authorName || "Anonymous",
+        authorEmail: data.authorEmail,
+        authorAvatar: data.authorAvatar,
+        status: "pending",
+        views: 0,
+        likes: 0,
+        featured: false,
+        readTime,
+      }
+    );
 
     return NextResponse.json(
       {
