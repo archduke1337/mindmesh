@@ -243,12 +243,14 @@ export default function AdminEventsPage() {
 
   const parseCheckInQR = (data: string) => {
     // Format: TICKET|{registrationId}|{userName}|{eventTitle}
+    // Split only on first 3 pipes to allow event titles with pipes
     const parts = data.split('|');
-    if (parts[0] === 'TICKET' && parts.length === 4) {
+    if (parts[0] === 'TICKET' && parts.length >= 4) {
+      const eventTitle = parts.slice(3).join('|'); // Join remaining parts for titles with pipes
       return {
         ticketId: parts[1],
         userName: parts[2],
-        eventTitle: parts[3],
+        eventTitle: eventTitle,
       };
     }
     return null;
@@ -259,9 +261,12 @@ export default function AdminEventsPage() {
       const data = checkinData.trim();
       if (!data) return;
 
+      console.log('🔍 Scanned QR data:', data);
       const parsed = parseCheckInQR(data);
+      console.log('📋 Parsed QR:', parsed);
       
       if (!parsed) {
+        console.warn('❌ Failed to parse QR code');
         const record = {
           id: 'INVALID',
           name: 'Invalid QR Code',
@@ -277,8 +282,10 @@ export default function AdminEventsPage() {
 
       // Find registration by ticket ID (registration document ID)
       const registration = registrations.find(r => r.$id === parsed.ticketId);
+      console.log('🎫 Found registration:', registration);
       
       if (!registration) {
+        console.warn('❌ Registration not found for ticket:', parsed.ticketId);
         const record = {
           id: parsed.ticketId,
           name: parsed.userName,
@@ -305,10 +312,13 @@ export default function AdminEventsPage() {
         status: isDuplicate ? ('duplicate' as const) : ('success' as const),
       };
       
+      console.log('✅ Check-in record:', record);
       setCheckinRecords([record, ...checkinRecords]);
       if (isDuplicate) {
+        console.warn('⚠️ Duplicate scan detected');
         setCheckinStats(prev => ({ ...prev, duplicates: prev.duplicates + 1 }));
       } else {
+        console.log('✓ Successful check-in');
         setCheckinStats(prev => ({ ...prev, successful: prev.successful + 1 }));
       }
       
