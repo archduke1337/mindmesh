@@ -12,8 +12,16 @@ const generateTicketId = (): string => {
 };
 
 // Generate QR code URL (using free QR code API)
-const generateQRCode = (ticketId: string): string => {
-  return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(ticketId)}`;
+// Updated to use ticket QR format: TICKET|ticketId|userName|eventTitle
+const generateQRCode = (ticketId: string, userName?: string, eventTitle?: string): string => {
+  let qrData = ticketId;
+  
+  // If additional info provided, use ticket QR format for venue check-in
+  if (userName && eventTitle) {
+    qrData = `TICKET|${ticketId}|${userName}|${eventTitle}`;
+  }
+  
+  return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}`;
 };
 
 // Format date for email (e.g., "Monday, January 15, 2025")
@@ -107,7 +115,7 @@ export const sendRegistrationEmail = async (
   try {
     // Generate unique ticket ID and QR code
     const ticketId = generateTicketId();
-    const qrCodeUrl = generateQRCode(ticketId);
+    const qrCodeUrl = generateQRCode(ticketId, userName, eventData.title);
     const actualPrice = eventData.discountPrice || eventData.price;
 
     console.log('📧 Starting email registration process...');

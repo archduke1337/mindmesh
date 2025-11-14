@@ -2,14 +2,21 @@
 // QR Code generation for event check-ins
 
 /**
- * Generate QR code URL for event using a free QR code API
- * Encodes event details for venue check-in scanning
+ * Generate individual ticket QR code for venue check-in
+ * Each attendee gets a unique QR code with their ticket info
+ */
+export function generateTicketQRCodeUrl(ticketId: string, userName: string, eventTitle: string): string {
+  const ticketData = `TICKET|${ticketId}|${userName}|${eventTitle}`;
+  const encoded = encodeURIComponent(ticketData);
+  return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encoded}`;
+}
+
+/**
+ * Generate master event QR code for organizers
+ * Used to display at venue for general information (deprecated - use ticketQRCodeUrl instead)
  */
 export function generateEventQRCodeUrl(eventId: string, eventTitle: string): string {
-  const data = `EVENT|${eventId}|${eventTitle}|${Date.now()}`;
-  
-  // Using qr-server.com free API (no key required)
-  // Encodes the data as query params
+  const data = `EVENT|${eventId}|${eventTitle}`;
   const encoded = encodeURIComponent(data);
   return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encoded}`;
 }
@@ -24,8 +31,8 @@ export function generateEventShareQRCodeUrl(eventId: string): string {
 }
 
 /**
- * Generate check-in QR code data
+ * Generate check-in QR code data for API processing
  */
-export function generateCheckInCode(eventId: string, userId: string): string {
-  return `CHECK_IN|${eventId}|${userId}|${Date.now()}`;
+export function generateCheckInCode(ticketId: string): string {
+  return `CHECK_IN|${ticketId}|${new Date().toISOString()}`;
 }
