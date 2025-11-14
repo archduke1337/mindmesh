@@ -72,7 +72,7 @@ export default function EditBlogPage() {
         content: blog.content,
         coverImage: blog.coverImage,
         category: blog.category,
-        tags: blog.tags.join(", "),
+        tags: blog.tags,
       });
     } catch (err) {
       const msg = getErrorMessage(err);
