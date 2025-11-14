@@ -23,7 +23,10 @@ export const createAdminDatabases = () => {
         throw new Error("Missing required environment variables: APPWRITE_ENDPOINT, APPWRITE_PROJECT_ID, or APPWRITE_API_KEY");
       }
 
-      const url = `${endpoint}/v1/databases/${databaseId}/collections/${collectionId}/documents`;
+      const url = `${endpoint}/databases/${databaseId}/collections/${collectionId}/documents`;
+      
+      console.log("Creating document at:", url);
+      console.log("With headers - X-Appwrite-Key:", apiKey ? "***" : "MISSING", "X-Appwrite-Project:", projectId);
       
       const response = await fetch(url, {
         method: "POST",
@@ -39,9 +42,14 @@ export const createAdminDatabases = () => {
       });
       
       if (!response.ok) {
-        const error = await response.json();
-        console.error("Appwrite API Error:", error);
-        throw new Error(error.message || "Failed to create document");
+        const errorText = await response.text();
+        console.error("Appwrite API Error - Status:", response.status, "Body:", errorText);
+        try {
+          const error = JSON.parse(errorText);
+          throw new Error(error.message || `HTTP ${response.status}: Failed to create document`);
+        } catch {
+          throw new Error(`HTTP ${response.status}: ${errorText}`);
+        }
       }
       
       return response.json();
@@ -64,8 +72,10 @@ export const createAdminStorage = () => {
       formData.append("fileId", fileId);
       formData.append("file", file);
       
-      const url = `${endpoint}/v1/storage/buckets/${bucketId}/files`;
+      const url = `${endpoint}/storage/buckets/${bucketId}/files`;
 
+      console.log("Uploading file to:", url);
+      
       const response = await fetch(url, {
         method: "POST",
         headers: {
@@ -76,9 +86,14 @@ export const createAdminStorage = () => {
       });
       
       if (!response.ok) {
-        const error = await response.json();
-        console.error("Appwrite Storage Error:", error);
-        throw new Error(error.message || "Failed to upload file");
+        const errorText = await response.text();
+        console.error("Appwrite Storage Error - Status:", response.status, "Body:", errorText);
+        try {
+          const error = JSON.parse(errorText);
+          throw new Error(error.message || `HTTP ${response.status}: Failed to upload file`);
+        } catch {
+          throw new Error(`HTTP ${response.status}: ${errorText}`);
+        }
       }
       
       return response.json();
