@@ -39,7 +39,7 @@ export function generateRegistrationListPDF(
   const col3Width = 50;  // Registration Date
   
   doc.setFontSize(10);
-  doc.setFont(undefined, "bold");
+  doc.setFont("helvetica", "bold");
   doc.text("Name", margin, startY);
   doc.text("Email", margin + col1Width, startY);
   doc.text("Registration Date", margin + col1Width + col2Width, startY);
