@@ -1058,7 +1058,7 @@ export default function TicketsPageContent() {
               {getQRCodeUrl(selectedTicket) && (
                 <>
                   <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 p-4 sm:p-6 md:p-8 rounded-xl border border-purple-200/50 dark:border-purple-800/50">
-                    <div className="flex flex-col items-center gap-4">
+                    <div className="flex flex-col gap-4">
                       <div>
                         <h3 className="text-sm sm:text-base font-semibold text-center mb-2 text-default-700">
                           📱 Your Check-In QR Code
@@ -1067,29 +1067,41 @@ export default function TicketsPageContent() {
                           Show this to staff when checking in at the venue
                         </p>
                       </div>
-                      <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md border border-default-200">
-                        <img
-                          src={getQRCodeUrl(selectedTicket)}
-                          alt="Ticket QR Code"
-                          className="w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64"
-                          title="Scan this QR code for check-in"
-                        />
+                      
+                      {/* QR Code and Data Side-by-Side */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                        {/* QR Code */}
+                        <div className="flex justify-center">
+                          <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md border border-default-200">
+                            <img
+                              src={getQRCodeUrl(selectedTicket)}
+                              alt="Ticket QR Code"
+                              className="w-48 h-48 sm:w-56 sm:h-56"
+                              title="Scan this QR code for check-in"
+                            />
+                          </div>
+                        </div>
+                        
+                        {/* QR Data */}
+                        {(() => {
+                          const qrData = selectedTicket.ticketQRData || `TICKET|${selectedTicket.ticketId}|${selectedTicket.userName}|${selectedTicket.eventTitle}`;
+                          return (
+                            <div className="flex flex-col justify-center">
+                              <div className="bg-white dark:bg-default-900 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
+                                <p className="text-xs font-semibold text-purple-700 dark:text-purple-300 mb-3">QR Data (Text Format):</p>
+                                <p className="text-xs font-mono text-purple-600 dark:text-purple-400 break-all leading-relaxed bg-purple-50 dark:bg-purple-950/50 p-3 rounded border border-purple-200 dark:border-purple-800">
+                                  {qrData}
+                                </p>
+                                <p className="text-xs text-default-500 mt-3">
+                                  ✅ This is the unique data encoded in your QR code. Save it for your records.
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </div>
                       
-                      {/* QR Code Data Display */}
-                      {(() => {
-                        const qrData = selectedTicket.ticketQRData || `TICKET|${selectedTicket.ticketId}|${selectedTicket.userName}|${selectedTicket.eventTitle}`;
-                        return (
-                          <div className="w-full bg-white/60 dark:bg-default-900/40 border border-default-300 dark:border-default-700 rounded-lg p-3">
-                            <p className="text-xs font-semibold text-default-700 mb-2">QR Data (Text Format):</p>
-                            <p className="text-xs font-mono text-default-600 dark:text-default-400 break-all leading-relaxed">
-                              {qrData}
-                            </p>
-                          </div>
-                        );
-                      })()}
-                      
-                      <p className="text-xs text-center text-default-500 max-w-sm">
+                      <p className="text-xs text-center text-default-500 max-w-full">
                         💡 <strong>Tip:</strong> You can take a screenshot, download, or print this QR code and present it at the event.
                       </p>
                     </div>

@@ -1338,55 +1338,63 @@ export default function AdminEventsPage() {
             ) : registrations.length > 0 ? (
               // Normal Registration View with QR Codes
               <div className="max-h-[60vh] overflow-y-auto">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-4">
                   {registrations.map((reg) => (
                     <Card key={reg.$id} className="border-default-200">
-                      <CardBody className="p-4 space-y-3">
-                        <div>
-                          <p className="text-sm font-semibold text-default-700">{reg.userName}</p>
-                          <p className="text-xs text-default-500">{reg.userEmail}</p>
-                          <p className="text-xs text-default-400 mt-1">
-                            Registered: {new Date(reg.registeredAt).toLocaleDateString()}
-                          </p>
-                        </div>
-                        
-                        {/* QR Code Display */}
-                        {reg.$id && (
-                          <>
-                            <div className="flex justify-center p-2 bg-default-100 rounded-lg">
-                              <img
-                                src={getQRCodeUrl(reg.$id)}
-                                alt={`QR for ${reg.userName}`}
-                                className="w-24 h-24"
-                              />
-                            </div>
-
-                            {/* QR Data Display */}
-                            {(() => {
-                              const qrData = (reg as any).ticketQRData || `TICKET|${reg.$id}|${reg.userName}|${selectedEventForRegistrations?.title}`;
-                              return (
-                                <div className="bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 rounded-lg p-2">
-                                  <p className="text-xs font-semibold text-purple-700 dark:text-purple-300 mb-1">QR Data:</p>
-                                  <p className="text-xs font-mono text-purple-600 dark:text-purple-400 break-all leading-tight">
-                                    {qrData}
-                                  </p>
+                      <CardBody className="p-4">
+                        <div className="flex flex-col gap-4">
+                          {/* Registration Info */}
+                          <div>
+                            <p className="text-sm font-semibold text-default-700">{reg.userName}</p>
+                            <p className="text-xs text-default-500">{reg.userEmail}</p>
+                            <p className="text-xs text-default-400 mt-1">
+                              Registered: {new Date(reg.registeredAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                          
+                          {/* QR Code and Data Side-by-Side */}
+                          {reg.$id && (
+                            <>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {/* QR Code */}
+                                <div className="flex justify-center md:justify-start">
+                                  <div className="p-3 bg-default-100 rounded-lg border border-default-200">
+                                    <img
+                                      src={getQRCodeUrl(reg.$id)}
+                                      alt={`QR for ${reg.userName}`}
+                                      className="w-32 h-32"
+                                    />
+                                  </div>
                                 </div>
-                              );
-                            })()}
 
-                            {/* Download QR Button */}
-                            <Button
-                              size="sm"
-                              variant="flat"
-                              color="primary"
-                              fullWidth
-                              onPress={() => downloadTicketQR(reg.$id!)}
-                            >
-                              <Download className="w-4 h-4" />
-                              <span className="ml-2">Download QR</span>
-                            </Button>
-                          </>
-                        )}
+                                {/* QR Data */}
+                                {(() => {
+                                  const qrData = (reg as any).ticketQRData || `TICKET|${reg.$id}|${reg.userName}|${selectedEventForRegistrations?.title}`;
+                                  return (
+                                    <div className="bg-white dark:bg-default-900 border border-purple-200 dark:border-purple-800 rounded-lg p-3">
+                                      <p className="text-xs font-semibold text-purple-700 dark:text-purple-300 mb-2">QR Data:</p>
+                                      <p className="text-xs font-mono text-purple-600 dark:text-purple-400 break-all leading-relaxed bg-purple-50 dark:bg-purple-950/50 p-2 rounded border border-purple-200 dark:border-purple-800">
+                                        {qrData}
+                                      </p>
+                                    </div>
+                                  );
+                                })()}
+                              </div>
+
+                              {/* Download QR Button */}
+                              <Button
+                                size="sm"
+                                variant="flat"
+                                color="primary"
+                                fullWidth
+                                onPress={() => downloadTicketQR(reg.$id!)}
+                              >
+                                <Download className="w-4 h-4" />
+                                <span className="ml-2">Download QR</span>
+                              </Button>
+                            </>
+                          )}
+                        </div>
                       </CardBody>
                     </Card>
                   ))}
