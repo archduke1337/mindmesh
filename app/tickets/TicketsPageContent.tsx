@@ -163,6 +163,13 @@ export default function TicketsPageContent() {
     }
   }, [user, authLoading, router]);
 
+  const getQRCodeUrl = (ticket: Ticket) => {
+    if (!ticket.ticketId || !ticket.userName || !ticket.eventTitle) return '';
+    const ticketData = `TICKET|${ticket.ticketId}|${ticket.userName}|${ticket.eventTitle}`;
+    const encoded = encodeURIComponent(ticketData);
+    return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encoded}`;
+  };
+
   const handleDownloadTicket = async (ticket: Ticket) => {
     try {
       // Create a temporary container for rendering
@@ -931,37 +938,51 @@ export default function TicketsPageContent() {
 
                     {/* Action Buttons */}
                     <Divider className="my-2 sm:my-3" />
-                    <div className="flex flex-col xs:flex-row gap-1.5 sm:gap-2 pt-1 sm:pt-2">
-                      <Button
-                        size="sm"
-                        variant="flat"
-                        startContent={<DownloadIcon className="w-3.5 h-3.5" />}
-                        onPress={() => handleDownloadTicket(ticket)}
-                        className="flex-1 font-semibold text-xs sm:text-sm transition-all hover:bg-purple-100 active:scale-95"
-                        color="primary"
-                      >
-                        Download
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="flat"
-                        startContent={<PrinterIcon className="w-4 h-4" />}
-                        onPress={() => handlePrintTicket(ticket)}
-                        className="flex-1 font-semibold transition-all hover:bg-purple-100"
-                        color="primary"
-                      >
-                        Print
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="flat"
-                        startContent={<ShareIcon className="w-4 h-4" />}
-                        onPress={() => handleShareTicket(ticket)}
-                        className="flex-1 font-semibold transition-all hover:bg-purple-100"
-                        color="primary"
-                      >
-                        Share
-                      </Button>
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2 sm:pt-3">
+                      <div className="flex gap-1.5 sm:gap-2 flex-1">
+                        <Button
+                          size="sm"
+                          variant="flat"
+                          startContent={<DownloadIcon className="w-3.5 h-3.5" />}
+                          onPress={() => handleDownloadTicket(ticket)}
+                          className="flex-1 font-semibold text-xs sm:text-sm transition-all hover:bg-purple-100 active:scale-95"
+                          color="primary"
+                        >
+                          Download
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="flat"
+                          startContent={<PrinterIcon className="w-4 h-4" />}
+                          onPress={() => handlePrintTicket(ticket)}
+                          className="flex-1 font-semibold transition-all hover:bg-purple-100"
+                          color="primary"
+                        >
+                          Print
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="flat"
+                          startContent={<ShareIcon className="w-4 h-4" />}
+                          onPress={() => handleShareTicket(ticket)}
+                          className="flex-1 font-semibold transition-all hover:bg-purple-100"
+                          color="primary"
+                        >
+                          Share
+                        </Button>
+                      </div>
+                      
+                      {/* QR Code Preview */}
+                      {getQRCodeUrl(ticket) && (
+                        <div className="flex items-center justify-center p-2 bg-default-100 rounded-lg border border-default-200">
+                          <img
+                            src={getQRCodeUrl(ticket)}
+                            alt="Ticket QR Code"
+                            className="w-12 h-12 sm:w-14 sm:h-14"
+                            title="Your check-in QR code"
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
                 </CardBody>
@@ -1012,6 +1033,37 @@ export default function TicketsPageContent() {
               </div>
 
               <Divider />
+
+              {/* QR Code Display */}
+              {getQRCodeUrl(selectedTicket) && (
+                <>
+                  <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 p-4 sm:p-6 md:p-8 rounded-xl border border-purple-200/50 dark:border-purple-800/50">
+                    <div className="flex flex-col items-center gap-4">
+                      <div>
+                        <h3 className="text-sm sm:text-base font-semibold text-center mb-2 text-default-700">
+                          📱 Your Check-In QR Code
+                        </h3>
+                        <p className="text-xs sm:text-small text-center text-default-500 mb-4">
+                          Show this to staff when checking in at the venue
+                        </p>
+                      </div>
+                      <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md border border-default-200">
+                        <img
+                          src={getQRCodeUrl(selectedTicket)}
+                          alt="Ticket QR Code"
+                          className="w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64"
+                          title="Scan this QR code for check-in"
+                        />
+                      </div>
+                      <p className="text-xs text-center text-default-500 max-w-sm">
+                        💡 <strong>Tip:</strong> You can take a screenshot, download, or print this QR code and present it at the event.
+                      </p>
+                    </div>
+                  </div>
+
+                  <Divider />
+                </>
+              )}
 
               {/* Event Details */}
               <div>
