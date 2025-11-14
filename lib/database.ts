@@ -34,7 +34,6 @@ export interface Event {
   isFeatured: boolean;
   isPremium: boolean;
   status?: string; // Made optional
-  isClosed?: boolean; // New: event closed for registrations
   isRecurring?: boolean; // New: recurring events flag
   recurringPattern?: "none" | "weekly" | "monthly" | "quarterly"; // New: recurrence pattern
   parentEventId?: string; // New: reference to parent if recurring
@@ -170,11 +169,10 @@ export const eventService = {
   // Create event - Remove status if it doesn't exist in collection
   async createEvent(eventData: Omit<Event, '$id' | '$createdAt' | '$updatedAt'>) {
     try {
-      // Ensure status and isClosed have default values
+      // Ensure status has default value
       const dataWithDefaults = {
         ...eventData,
         status: eventData.status || "upcoming",
-        isClosed: eventData.isClosed ?? false,
       };
       
       const response = await databases.createDocument(
@@ -193,11 +191,10 @@ export const eventService = {
   // Update event
   async updateEvent(eventId: string, eventData: Partial<Event>) {
     try {
-      // Ensure status and isClosed have default values if provided
+      // Ensure status has default value if provided
       const dataWithDefaults = {
         ...eventData,
         status: eventData.status || "upcoming",
-        isClosed: eventData.isClosed ?? false,
       };
       
       const response = await databases.updateDocument(
@@ -301,11 +298,6 @@ export const eventService = {
 
       // Get event to check capacity and status
       const event = await this.getEventById(eventId);
-      
-      // Check if event is closed
-      if (event.isClosed) {
-        throw new Error("Event is closed for registrations");
-      }
       
       if (event.capacity && event.registered >= event.capacity) {
         throw new Error("Event is full");

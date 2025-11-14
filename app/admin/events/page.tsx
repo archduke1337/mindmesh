@@ -70,7 +70,6 @@ export default function AdminEventsPage() {
     tags: [],
     isFeatured: false,
     isPremium: false,
-    isClosed: false,
     status: "upcoming",
     isRecurring: false,
     recurringPattern: undefined,
@@ -1076,39 +1075,6 @@ export default function AdminEventsPage() {
                               💡 Recurring events will be automatically created based on the pattern. You can edit individual events later.
                             </p>
                           </div>
-                        </div>
-                      )}
-                    </div>
-
-                    <hr className="my-2" />
-
-                    {/* Close Event Section */}
-                    <div className="p-3 md:p-4 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-lg md:rounded-xl border border-red-200 dark:border-red-800">
-                      <div className="flex items-start justify-between">
-                        <div className="min-w-0">
-                          <h3 className="font-semibold text-foreground text-sm md:text-base flex items-center gap-2">
-                            <XIcon className="w-4 h-4 text-red-600 flex-shrink-0" />
-                            Close Event
-                          </h3>
-                          <p className="text-xs md:text-sm text-default-500 mt-1">Disable new registrations after event is over</p>
-                        </div>
-                      </div>
-                      
-                      <Switch
-                        isSelected={formData.isClosed}
-                        onValueChange={(checked) => handleInputChange("isClosed", checked)}
-                        color="danger"
-                        className="mt-3"
-                        size="sm"
-                      >
-                        <span className="text-xs md:text-sm font-medium">Event is closed for registrations</span>
-                      </Switch>
-
-                      {formData.isClosed && (
-                        <div className="mt-3 p-3 bg-red-100/50 dark:bg-red-900/30 rounded-lg border border-red-200 dark:border-red-800">
-                          <p className="text-xs text-red-700 dark:text-red-300 font-semibold">
-                            ⚠️ This event is closed. Users will not be able to register anymore.
-                          </p>
                         </div>
                       )}
                     </div>
