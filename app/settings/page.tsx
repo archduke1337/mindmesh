@@ -177,9 +177,24 @@ export default function SettingsPage() {
   const handleDeleteAccount = async () => {
     if (confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
       try {
-        alert("Account deletion requires backend implementation. Please contact support.");
+        // Call the delete account API
+        const response = await fetch("/api/auth/delete-account", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || "Failed to delete account");
+        }
+
+        alert("Account deleted successfully. Redirecting to home...");
+        // Redirect to home after account deletion
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 1500);
       } catch (err: any) {
-        alert("Failed to delete account");
+        alert(err.message || "Failed to delete account");
       }
     }
   };

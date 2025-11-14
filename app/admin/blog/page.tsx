@@ -1,7 +1,7 @@
 // app/admin/blogs/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
@@ -31,11 +31,18 @@ export default function AdminBlogsPage() {
   const [selectedTab, setSelectedTab] = useState("pending");
   const [processingBlog, setProcessingBlog] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
   // Rejection modal
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [rejectingBlog, setRejectingBlog] = useState<Blog | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
+
+  // Toast helper
+  const showToast = useCallback((message: string, type: "success" | "error" = "success") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  }, []);
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -88,11 +95,11 @@ export default function AdminBlogsPage() {
     setProcessingBlog(blogId);
     try {
       await blogService.approveBlog(blogId);
-      alert("Blog approved successfully!");
+      showToast("Blog approved successfully!", "success");
       await loadBlogs();
     } catch (error) {
       console.error("Error approving blog:", error);
-      alert("Failed to approve blog");
+      showToast("Failed to approve blog", "error");
     } finally {
       setProcessingBlog(null);
     }
@@ -107,19 +114,19 @@ export default function AdminBlogsPage() {
   const handleReject = async () => {
     if (!rejectingBlog) return;
     if (!rejectionReason.trim()) {
-      alert("Please provide a reason for rejection");
+      showToast("Please provide a reason for rejection", "error");
       return;
     }
 
     setProcessingBlog(rejectingBlog.$id!);
     try {
       await blogService.rejectBlog(rejectingBlog.$id!, rejectionReason);
-      alert("Blog rejected");
+      showToast("Blog rejected", "success");
       await loadBlogs();
       setRejectModalOpen(false);
     } catch (error) {
       console.error("Error rejecting blog:", error);
-      alert("Failed to reject blog");
+      showToast("Failed to reject blog", "error");
     } finally {
       setProcessingBlog(null);
     }
@@ -130,22 +137,22 @@ export default function AdminBlogsPage() {
 
     try {
       await blogService.deleteBlog(blogId);
-      alert("Blog deleted successfully!");
+      showToast("Blog deleted successfully!", "success");
       await loadBlogs();
     } catch (error) {
       console.error("Error deleting blog:", error);
-      alert("Failed to delete blog");
+      showToast("Failed to delete blog", "error");
     }
   };
 
   const toggleFeatured = async (blog: Blog) => {
     try {
       await blogService.updateBlog(blog.$id!, { featured: !blog.featured });
-      alert(`Blog ${!blog.featured ? "featured" : "unfeatured"} successfully!`);
+      showToast(`Blog ${!blog.featured ? "featured" : "unfeatured"} successfully!`, "success");
       await loadBlogs();
     } catch (error) {
       console.error("Error toggling featured:", error);
-      alert("Failed to update blog");
+      showToast("Failed to update blog", "error");
     }
   };
 
@@ -435,6 +442,20 @@ export default function AdminBlogsPage() {
           </ModalFooter>
         </ModalContent>
       </Modal>
+
+      {/* Toast Notification */}
+      {toast && (
+        <div className={`fixed bottom-4 right-4 px-4 py-3 rounded-lg text-white flex items-center gap-2 z-50 ${
+          toast.type === "success" ? "bg-success" : "bg-danger"
+        }`}>
+          {toast.type === "success" ? (
+            <CheckIcon className="w-5 h-5" />
+          ) : (
+            <XIcon className="w-5 h-5" />
+          )}
+          {toast.message}
+        </div>
+      )}
     </AdminPageWrapper>
   );
 }
