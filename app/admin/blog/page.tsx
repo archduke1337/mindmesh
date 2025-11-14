@@ -156,12 +156,13 @@ export default function AdminBlogsPage() {
 
   const toggleFeatured = async (blog: Blog) => {
     try {
-      await blogService.updateBlog(blog.$id!, { featured: !blog.featured });
+      await blogService.toggleFeatured(blog.$id!, !blog.featured);
       showToast(`Blog ${!blog.featured ? "featured" : "unfeatured"} successfully!`, "success");
       await loadBlogs();
     } catch (error) {
-      console.error("Error toggling featured:", error);
-      showToast("Failed to update blog", "error");
+      const errorMsg = getErrorMessage(error);
+      console.error("Error toggling featured:", errorMsg);
+      showToast(errorMsg || "Failed to update blog", "error");
     }
   };
 

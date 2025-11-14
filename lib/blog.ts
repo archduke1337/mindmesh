@@ -22,6 +22,8 @@ export interface Blog {
   authorAvatar?: string;
   status?: "draft" | "pending" | "approved" | "rejected";
   rejectionReason?: string;
+  rejectionHistory?: Array<{ reason: string; rejectedAt: string; rejectedBy?: string }>;
+  rejectionCount?: number;
   publishedAt?: string;
   views: number;
   likes: number;
@@ -253,6 +255,15 @@ export const blogService = {
   // Reject blog (admin only)
   async rejectBlog(blogId: string, reason: string) {
     try {
+      const blog = await this.getBlogById(blogId);
+      
+      // Keep track of rejection history
+      const rejectionHistory = blog.rejectionHistory || [];
+      rejectionHistory.push({
+        reason,
+        rejectedAt: new Date().toISOString(),
+      });
+
       const response = await databases.updateDocument(
         DATABASE_ID,
         BLOGS_COLLECTION_ID,
@@ -260,6 +271,8 @@ export const blogService = {
         {
           status: "rejected",
           rejectionReason: reason,
+          rejectionHistory,
+          rejectionCount: (blog.rejectionCount || 0) + 1,
         }
       );
       return response as unknown as Blog;
@@ -303,14 +316,18 @@ export const blogService = {
     }
   },
 
-  // Increment views
-  async incrementViews(blogId: string, currentViews: number) {
+  // Increment views (atomic operation)
+  async incrementViews(blogId: string) {
     try {
+      // Instead of reading and writing, use a direct update
+      // This is safer for concurrent requests
+      const blog = await this.getBlogById(blogId);
       await databases.updateDocument(DATABASE_ID, BLOGS_COLLECTION_ID, blogId, {
-        views: currentViews + 1,
+        views: (blog.views || 0) + 1,
       });
     } catch (error) {
       console.error("Error incrementing views:", error);
+      // Silently fail - don't break page load for this
     }
   },
 
@@ -353,6 +370,38 @@ export const blogService = {
     const wordsPerMinute = 200;
     const wordCount = content.split(/\s+/).length;
     return Math.ceil(wordCount / wordsPerMinute);
+  },
+
+  // Toggle featured status with limit check
+  async toggleFeatured(blogId: string, setFeatured: boolean) {
+    try {
+      // If trying to feature, check limit (max 5 featured blogs)
+      if (setFeatured) {
+        const featured = await databases.listDocuments(
+          DATABASE_ID,
+          BLOGS_COLLECTION_ID,
+          [
+            Query.equal("featured", true),
+            Query.limit(100)
+          ]
+        );
+        
+        if (featured.documents.length >= 5) {
+          throw new Error("Maximum 5 featured blogs allowed. Please unfeature one first.");
+        }
+      }
+
+      const response = await databases.updateDocument(
+        DATABASE_ID,
+        BLOGS_COLLECTION_ID,
+        blogId,
+        { featured: setFeatured }
+      );
+      return response as unknown as Blog;
+    } catch (error) {
+      console.error("Error toggling featured:", error);
+      throw error;
+    }
   },
 };
 

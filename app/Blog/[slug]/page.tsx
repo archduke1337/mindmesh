@@ -24,6 +24,7 @@ export default function BlogPostPage() {
   const [blog, setBlog] = useState<Blog | null>(null);
   const [loading, setLoading] = useState(true);
   const [relatedBlogs, setRelatedBlogs] = useState<Blog[]>([]);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
   useEffect(() => {
     if (slug) {
@@ -38,7 +39,7 @@ export default function BlogPostPage() {
 
       // Increment views
       if (blogData) {
-        blogService.incrementViews(blogData.$id!, blogData.views);
+        blogService.incrementViews(blogData.$id!);
       }
 
       // Load related blogs
@@ -53,8 +54,8 @@ export default function BlogPostPage() {
       }
     } catch (error) {
       console.error("Error loading blog:", error);
-      alert("Blog not found");
-      router.push("/Blog");
+      setToast({ message: "Blog not found", type: "error" });
+      setTimeout(() => router.push("/Blog"), 2000);
     } finally {
       setLoading(false);
     }
@@ -77,7 +78,8 @@ export default function BlogPostPage() {
       });
     } else {
       navigator.clipboard.writeText(window.location.href);
-      alert("Link copied to clipboard!");
+      setToast({ message: "Link copied to clipboard!", type: "success" });
+      setTimeout(() => setToast(null), 2000);
     }
   };
 
@@ -252,6 +254,20 @@ export default function BlogPostPage() {
           )}
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {toast && (
+        <div className={`fixed bottom-4 right-4 px-4 py-3 rounded-lg text-white flex items-center gap-2 z-50 ${
+          toast.type === "success" ? "bg-success" : "bg-danger"
+        }`}>
+          {toast.type === "success" ? (
+            <span>✓</span>
+          ) : (
+            <span>✕</span>
+          )}
+          {toast.message}
+        </div>
+      )}
     </div>
   );
 }
