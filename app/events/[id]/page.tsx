@@ -97,11 +97,25 @@ export default function EventDetailPage() {
       const confirmed = confirm("Are you sure you want to unregister from this event?");
       if (!confirmed) return;
       
+      try {
+        // Unregister from database to sync with admin panel
+        await eventService.unregisterFromEvent(eventId, user.$id);
+        console.log("✅ Unregistered from event in database");
+      } catch (error) {
+        console.warn("⚠️ Warning: Could not unregister from database, but removing from local storage:", error);
+        // Continue with local cleanup even if DB fails
+      }
+      
       eventStorageManager.removeRegisteredEvent(eventId);
       eventStorageManager.deleteTicket(eventId);
       setIsRegistered(false);
       setEmailSent(false);
       setTicketId("");
+      
+      // Reload event to get updated registration count from DB
+      await loadEvent();
+      
+      alert("Successfully unregistered from event");
       return;
     }
 

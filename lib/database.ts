@@ -329,6 +329,50 @@ export const eventService = {
     }
   },
 
+  // Unregister user from event
+  async unregisterFromEvent(eventId: string, userId: string) {
+    try {
+      // Find the registration to delete
+      const registrations = await databases.listDocuments(
+        DATABASE_ID,
+        REGISTRATIONS_COLLECTION_ID,
+        [
+          Query.equal("eventId", eventId),
+          Query.equal("userId", userId),
+          Query.limit(1)
+        ]
+      );
+
+      if (registrations.documents.length === 0) {
+        throw new Error("Registration not found");
+      }
+
+      const registrationId = registrations.documents[0].$id;
+
+      // Delete the registration
+      await databases.deleteDocument(
+        DATABASE_ID,
+        REGISTRATIONS_COLLECTION_ID,
+        registrationId
+      );
+
+      // Get event to decrement registered count
+      const event = await this.getEventById(eventId);
+      const newCount = Math.max(0, event.registered - 1);
+
+      // Update event registered count
+      await this.updateEvent(eventId, {
+        registered: newCount
+      });
+
+      console.log(`User ${userId} unregistered from event ${eventId}`);
+      return true;
+    } catch (error) {
+      console.error("Error unregistering from event:", getErrorMessage(error));
+      throw error;
+    }
+  },
+
   // Get user registrations
   async getUserRegistrations(userId: string) {
     try {
