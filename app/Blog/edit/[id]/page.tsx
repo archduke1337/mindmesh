@@ -136,7 +136,8 @@ export default function EditBlogPage() {
       const tags = formData.tags
         .split(",")
         .map((tag) => tag.trim())
-        .filter((tag) => tag);
+        .filter((tag) => tag)
+        .join(", ");
 
       const updateData = {
         title: formData.title,
