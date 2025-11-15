@@ -88,6 +88,16 @@ export async function POST(request: NextRequest) {
     const slug = blogService.generateSlug(data.title);
     const readTime = blogService.calculateReadTime(data.content);
 
+    // WARNING: The Appwrite collection has content field limited to 255 chars!
+    // This needs to be increased to 65536 or more
+    // See: scripts/fix-blog-schema.js for details
+    if (data.content.length > 255) {
+      console.warn(
+        `⚠️  Blog content (${data.content.length} chars) exceeds Appwrite limit (255 chars). ` +
+        `The content will be truncated! Please update the 'content' attribute size in Appwrite to 65536.`
+      );
+    }
+
     // Use admin client for server-side database operations
     const adminDatabases = createAdminDatabases();
 
