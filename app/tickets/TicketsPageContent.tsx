@@ -246,6 +246,11 @@ export default function TicketsPageContent() {
       tempContainer.style.lineHeight = "1.6";
       tempContainer.style.color = "#333";
       tempContainer.style.boxSizing = "border-box";
+      tempContainer.style.margin = "0";
+      tempContainer.style.border = "none";
+      (tempContainer.style as any).WebkitFontSmoothing = "antialiased";
+      (tempContainer.style as any).MozOsxFontSmoothing = "grayscale";
+      tempContainer.style.textRendering = "geometricPrecision";
 
       const dateStr = new Date(ticket.date).toLocaleDateString("en-US", {
         year: "numeric",
@@ -373,32 +378,42 @@ export default function TicketsPageContent() {
       document.body.appendChild(tempContainer);
       log("[Download] Temp container appended");
 
-      // Wait for images to load
+      // Wait for images to load with timeout
       const images = tempContainer.querySelectorAll("img");
       log("[Download] Found", images.length, "images");
+      
+      const imageTimeout = 10000; // 10 second timeout per image
       
       await Promise.all(
         Array.from(images).map(
           (img) =>
-            new Promise<void>((resolve) => {
-              const imgElement = img as HTMLImageElement;
-              if (imgElement.complete) {
-                log("[Download] Image already loaded");
-                resolve();
-              } else {
-                imgElement.onload = () => {
-                  log("[Download] Image loaded");
+            Promise.race([
+              new Promise<void>((resolve) => {
+                const imgElement = img as HTMLImageElement;
+                if (imgElement.complete) {
+                  log("[Download] Image already loaded");
                   resolve();
-                };
-                imgElement.onerror = () => {
-                  warn("[Download] Image failed to load, continuing anyway");
-                  resolve(); // Don't fail, just continue
-                };
-              }
-            })
+                } else {
+                  imgElement.onload = () => {
+                    log("[Download] Image loaded successfully");
+                    resolve();
+                  };
+                  imgElement.onerror = () => {
+                    warn("[Download] Image failed to load, continuing anyway");
+                    resolve(); // Don't fail, just continue
+                  };
+                }
+              }),
+              new Promise<void>((resolve) => {
+                setTimeout(() => {
+                  warn("[Download] Image load timeout, continuing anyway");
+                  resolve();
+                }, imageTimeout);
+              }),
+            ])
         )
       );
-      log("[Download] All images loaded");
+      log("[Download] All images processed");
 
       // Convert HTML to canvas
       log("[Download] Converting HTML to canvas...");
@@ -409,6 +424,9 @@ export default function TicketsPageContent() {
         allowTaint: true,
         useCORS: true,
         removeContainer: false,
+        windowWidth: tempContainer.scrollWidth,
+        windowHeight: tempContainer.scrollHeight,
+        imageTimeout: 0, // Disable timeout to wait for all images
         ignoreElements: (element) => {
           if (element.tagName === "SCRIPT" || element.tagName === "STYLE") {
             return true;
@@ -418,8 +436,21 @@ export default function TicketsPageContent() {
         onclone: (clonedDocument) => {
           const clonedImages = clonedDocument.querySelectorAll("img");
           clonedImages.forEach((img) => {
-            (img as HTMLImageElement).style.maxWidth = "100%";
-            (img as HTMLImageElement).style.height = "auto";
+            const imgElement = img as HTMLImageElement;
+            imgElement.style.maxWidth = "100%";
+            imgElement.style.height = "auto";
+            imgElement.style.margin = "0";
+            imgElement.style.padding = "0";
+            imgElement.style.display = "block";
+          });
+          // Ensure all text elements are properly rendered
+          const textElements = clonedDocument.querySelectorAll("*");
+          textElements.forEach((el) => {
+            const element = el as HTMLElement;
+            if (element.style) {
+              (element.style as any).WebkitFontSmoothing = "antialiased";
+              element.style.textRendering = "geometricPrecision";
+            }
           });
         },
       });
