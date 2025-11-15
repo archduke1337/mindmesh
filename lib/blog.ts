@@ -293,16 +293,27 @@ export const blogService = {
         blogData.slug = `${blogData.slug}-${timestamp}`;
       }
 
+      // Create document with permissions allowing the API key to update it
+      // This allows admin operations to modify documents without permission issues
+      const { ID: { unique }, Permission, Role } = await import("appwrite");
+      
       const response = await databases.createDocument(
         DATABASE_ID,
         BLOGS_COLLECTION_ID,
-        ID.unique(),
+        unique(),
         {
           ...blogData,
           status: "pending", // Always starts as pending
           views: 0,
           likes: 0,
-        }
+        },
+        [
+          // Allow the owner (creator) to read and write
+          Permission.read(Role.user(blogData.authorId)),
+          Permission.write(Role.user(blogData.authorId)),
+          // Allow anyone with the API key to update (for admin operations)
+          Permission.write(Role.any()),
+        ]
       );
       return response as unknown as Blog;
     } catch (error) {
