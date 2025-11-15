@@ -207,11 +207,15 @@ export default function TicketsPageContent() {
       const tempContainer = document.createElement("div");
       tempContainer.style.position = "absolute";
       tempContainer.style.left = "-9999px";
+      tempContainer.style.top = "0";
       tempContainer.style.width = "800px";
       tempContainer.style.backgroundColor = "white";
       tempContainer.style.padding = "40px";
       tempContainer.style.fontFamily =
         "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+      tempContainer.style.lineHeight = "1.6";
+      tempContainer.style.color = "#333";
+      tempContainer.style.boxSizing = "border-box";
 
       const dateStr = new Date(ticket.date).toLocaleDateString("en-US", {
         year: "numeric",
@@ -339,12 +343,56 @@ export default function TicketsPageContent() {
       document.body.appendChild(tempContainer);
       console.log("[Download] Temp container appended");
 
+      // Wait for images to load
+      const images = tempContainer.querySelectorAll("img");
+      console.log("[Download] Found", images.length, "images");
+      
+      await Promise.all(
+        Array.from(images).map(
+          (img) =>
+            new Promise<void>((resolve, reject) => {
+              if ((img as HTMLImageElement).complete) {
+                console.log("[Download] Image already loaded");
+                resolve();
+              } else {
+                img.onload = () => {
+                  console.log("[Download] Image loaded");
+                  resolve();
+                };
+                img.onerror = () => {
+                  console.warn("[Download] Image failed to load, continuing anyway");
+                  resolve(); // Don't fail, just continue
+                };
+              }
+            })
+        )
+      );
+      console.log("[Download] All images loaded");
+
       // Convert HTML to canvas
       console.log("[Download] Converting HTML to canvas...");
       const canvas = await html2canvas(tempContainer, {
         scale: 2,
         logging: false,
         backgroundColor: "#ffffff",
+        allowTaint: true,
+        useCORS: true,
+        removeContainer: true,
+        ignoreElements: (element) => {
+          // Ignore script and style elements
+          if (element.tagName === "SCRIPT" || element.tagName === "STYLE") {
+            return true;
+          }
+          return false;
+        },
+        onclone: (clonedDocument) => {
+          // Ensure all images are loaded before rendering
+          const images = clonedDocument.querySelectorAll("img");
+          images.forEach((img) => {
+            img.style.maxWidth = "100%";
+            img.style.height = "auto";
+          });
+        },
       });
       console.log("[Download] Canvas created, size:", canvas.width, "x", canvas.height);
 
