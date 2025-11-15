@@ -105,7 +105,10 @@ export default function AdminBlogsPage() {
     try {
       const res = await fetch(`/api/blog/${blogId}/approve`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "x-user-email": user?.email || "",
+        },
         credentials: "same-origin",
       });
 
@@ -166,7 +169,13 @@ export default function AdminBlogsPage() {
     if (!confirm("Permanently delete this blog? This cannot be undone.")) return;
 
     try {
-      const res = await fetch(`/api/blog/${blogId}`, { method: "DELETE", credentials: "same-origin" });
+      const res = await fetch(`/api/blog/${blogId}`, { 
+        method: "DELETE", 
+        credentials: "same-origin",
+        headers: {
+          "x-user-email": user?.email || "",
+        },
+      });
       const result = await res.json();
       if (!res.ok) throw new Error(result?.error || `Failed to delete blog: ${res.statusText}`);
       showToast("Blog deleted successfully!", "success");
@@ -183,7 +192,10 @@ export default function AdminBlogsPage() {
       const res = await fetch(`/api/blog/${blog.$id}/featured`, {
         method: "POST",
         credentials: "same-origin",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "x-user-email": user?.email || "",
+        },
         body: JSON.stringify({ isFeatured: !blog.featured }),
       });
       const result = await res.json();
