@@ -19,7 +19,7 @@ const updateDocumentAdmin = async (databaseId: string, collectionId: string, doc
 
   const url = `${endpoint}/databases/${databaseId}/collections/${collectionId}/documents/${documentId}`;
   
-  console.log("[Blog] Using admin API to update document");
+  console.log("[Blog] Using admin API to update document", { documentId, dataKeys: Object.keys(data) });
   
   const response = await fetch(url, {
     method: "PATCH",
@@ -28,7 +28,7 @@ const updateDocumentAdmin = async (databaseId: string, collectionId: string, doc
       "X-Appwrite-Key": apiKey,
       "X-Appwrite-Project": projectId,
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify({ data }),
   });
   
   if (!response.ok) {
