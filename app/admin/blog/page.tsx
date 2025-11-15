@@ -103,7 +103,17 @@ export default function AdminBlogsPage() {
 
     setProcessingBlog(blogId);
     try {
-      await blogService.approveBlog(blogId);
+      const res = await fetch(`/api/blog/${blogId}/approve`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+      });
+
+      const result = await res.json();
+      if (!res.ok) {
+        throw new Error(result?.error || "Failed to approve blog");
+      }
+
       showToast("Blog approved successfully!", "success");
       await loadBlogs();
     } catch (error) {
@@ -129,7 +139,14 @@ export default function AdminBlogsPage() {
 
     setProcessingBlog(rejectingBlog.$id!);
     try {
-      await blogService.rejectBlog(rejectingBlog.$id!, rejectionReason);
+      const res = await fetch(`/api/blog/${rejectingBlog.$id}/reject`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ reason: rejectionReason }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result?.error || "Failed to reject blog");
       showToast("Blog rejected", "success");
       await loadBlogs();
       setRejectModalOpen(false);
@@ -145,7 +162,9 @@ export default function AdminBlogsPage() {
     if (!confirm("Permanently delete this blog? This cannot be undone.")) return;
 
     try {
-      await blogService.deleteBlog(blogId);
+      const res = await fetch(`/api/blog/${blogId}`, { method: "DELETE", credentials: "same-origin" });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result?.error || "Failed to delete blog");
       showToast("Blog deleted successfully!", "success");
       await loadBlogs();
     } catch (error) {
@@ -156,7 +175,15 @@ export default function AdminBlogsPage() {
 
   const toggleFeatured = async (blog: Blog) => {
     try {
-      await blogService.toggleFeatured(blog.$id!, !blog.featured);
+      const res = await fetch(`/api/blog/${blog.$id}/featured`, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isFeatured: !blog.featured }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result?.error || "Failed to toggle featured");
+
       showToast(`Blog ${!blog.featured ? "featured" : "unfeatured"} successfully!`, "success");
       await loadBlogs();
     } catch (error) {

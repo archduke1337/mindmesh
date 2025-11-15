@@ -62,13 +62,30 @@ export const blogService = {
         BLOGS_COLLECTION_ID,
         [
           Query.equal("status", "approved"),
-          Query.orderDesc("publishedAt"),
+          Query.orderDesc("$updatedAt"),
           Query.limit(limit),
         ]
       );
       return response.documents as unknown as Blog[];
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching published blogs:", error);
+      // If the error is about publishedAt not existing, try again without it
+      if (error?.message?.includes("publishedAt")) {
+        try {
+          const response = await databases.listDocuments(
+            DATABASE_ID,
+            BLOGS_COLLECTION_ID,
+            [
+              Query.equal("status", "approved"),
+              Query.orderDesc("$updatedAt"),
+              Query.limit(limit),
+            ]
+          );
+          return response.documents as unknown as Blog[];
+        } catch (retryError) {
+          console.error("Error fetching published blogs (retry):", retryError);
+        }
+      }
       return [];
     }
   },
@@ -82,13 +99,31 @@ export const blogService = {
         [
           Query.equal("status", "approved"),
           Query.equal("featured", true),
-          Query.orderDesc("publishedAt"),
+          Query.orderDesc("$updatedAt"),
           Query.limit(limit),
         ]
       );
       return response.documents as unknown as Blog[];
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching featured blogs:", error);
+      // If the error is about publishedAt not existing, try again without it
+      if (error?.message?.includes("publishedAt")) {
+        try {
+          const response = await databases.listDocuments(
+            DATABASE_ID,
+            BLOGS_COLLECTION_ID,
+            [
+              Query.equal("status", "approved"),
+              Query.equal("featured", true),
+              Query.orderDesc("$updatedAt"),
+              Query.limit(limit),
+            ]
+          );
+          return response.documents as unknown as Blog[];
+        } catch (retryError) {
+          console.error("Error fetching featured blogs (retry):", retryError);
+        }
+      }
       return [];
     }
   },
@@ -236,18 +271,32 @@ export const blogService = {
   // Approve blog (admin only)
   async approveBlog(blogId: string) {
     try {
+      const updateData: Record<string, any> = {
+        status: "approved",
+      };
+      
+      // Try to set publishedAt, but don't fail if attribute doesn't exist
+      try {
+        updateData.publishedAt = new Date().toISOString();
+      } catch {
+        console.warn("publishedAt attribute not available");
+      }
+
       const response = await databases.updateDocument(
         DATABASE_ID,
         BLOGS_COLLECTION_ID,
         blogId,
-        {
-          status: "approved",
-          publishedAt: new Date().toISOString(),
-        }
+        updateData
       );
       return response as unknown as Blog;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error approving blog:", error);
+      // Check if it's an "Attribute not found" error
+      if (error?.message?.includes("Attribute not found") && error?.message?.includes("publishedAt")) {
+        throw new Error(
+          "Missing 'publishedAt' attribute in blog collection. Please add it to Appwrite: Database → mindmesh → blog collection → Add Attribute (String)"
+        );
+      }
       throw error;
     }
   },
@@ -258,26 +307,53 @@ export const blogService = {
       const blog = await this.getBlogById(blogId);
       
       // Keep track of rejection history
-      const rejectionHistory = blog.rejectionHistory || [];
+      let rejectionHistory: Array<any> = [];
+      if (blog.rejectionHistory) {
+        if (typeof blog.rejectionHistory === "string") {
+          try {
+            rejectionHistory = JSON.parse(blog.rejectionHistory);
+          } catch {
+            rejectionHistory = [];
+          }
+        } else if (Array.isArray(blog.rejectionHistory)) {
+          rejectionHistory = blog.rejectionHistory;
+        }
+      }
+      
       rejectionHistory.push({
         reason,
         rejectedAt: new Date().toISOString(),
       });
 
+      const updateData: Record<string, any> = {
+        status: "rejected",
+        rejectionReason: reason,
+      };
+
+      // Try to set rejection history and count
+      try {
+        updateData.rejectionHistory = JSON.stringify(rejectionHistory);
+        updateData.rejectionCount = (blog.rejectionCount || 0) + 1;
+      } catch {
+        console.warn("rejectionHistory/rejectionCount attributes not available");
+      }
+
       const response = await databases.updateDocument(
         DATABASE_ID,
         BLOGS_COLLECTION_ID,
         blogId,
-        {
-          status: "rejected",
-          rejectionReason: reason,
-          rejectionHistory,
-          rejectionCount: (blog.rejectionCount || 0) + 1,
-        }
+        updateData
       );
       return response as unknown as Blog;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error rejecting blog:", error);
+      // Check if it's an "Attribute not found" error
+      if (error?.message?.includes("Attribute not found")) {
+        const missingAttr = error?.message?.match(/Attribute not found in schema: (\w+)/) || [];
+        throw new Error(
+          `Missing '${missingAttr[1] || "attribute"}' in blog collection. Please add it to Appwrite: Database → mindmesh → blog collection → Add Attribute`
+        );
+      }
       throw error;
     }
   },
