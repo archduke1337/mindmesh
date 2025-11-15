@@ -25,18 +25,6 @@ import {
   CheckCircle,
 } from "lucide-react";
 
-// Environment-based logging
-const DEBUG = process.env.NODE_ENV === "development";
-const log = (message: string, ...args: unknown[]) => {
-  if (DEBUG) console.log(message, ...args);
-};
-const warn = (message: string, ...args: unknown[]) => {
-  if (DEBUG) console.warn(message, ...args);
-};
-const error = (message: string, ...args: unknown[]) => {
-  console.error(message, ...args);
-};
-
 interface Ticket {
   ticketId: string | undefined;
   eventId: string;
@@ -61,7 +49,6 @@ export default function TicketsPageContent() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [ticketsLoading, setTicketsLoading] = useState(true);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
-  const [renderError, setRenderError] = useState<string | null>(null);
 
   // Get eventId from query parameters for auto-selection
   const eventIdParam = searchParams?.get("eventId");
@@ -69,87 +56,97 @@ export default function TicketsPageContent() {
   const loadTickets = async () => {
     try {
       setTicketsLoading(true);
-      setRenderError(null);
 
       if (!user) {
-        error("❌ No user found");
+        console.error("❌ No user found");
         setTickets([]);
         return;
       }
 
-      log("🔄 Loading tickets from database for user:", user.$id);
+      console.log("🔄 Loading tickets from database for user:", user.$id);
 
       // Try to load from database first
       try {
         const databaseTickets = await eventService.getUserTickets(user.$id);
-        log("✅ Tickets loaded from database:", databaseTickets.length);
+        console.log("✅ Tickets loaded from database:", databaseTickets.length);
 
         if (databaseTickets && databaseTickets.length > 0) {
-          // Sort by registered date (newest first) - typed properly
+          // Sort by registered date (newest first)
           const sortedTickets = [...databaseTickets].sort(
-            (a: Ticket, b: Ticket) =>
+            (a: any, b: any) =>
               new Date(b.registeredAt).getTime() -
               new Date(a.registeredAt).getTime()
-          );
+          ) as Ticket[];
           setTickets(sortedTickets);
 
           // Auto-select ticket if eventId is in query params
           if (eventIdParam) {
             const selectedTicketForEvent = sortedTickets.find(
-              (t: Ticket) => t.eventId === eventIdParam
+              (t: any) => t.eventId === eventIdParam
             );
             if (selectedTicketForEvent) {
-              setSelectedTicket(selectedTicketForEvent);
-              log("✅ Auto-selected ticket for event:", eventIdParam);
+              setSelectedTicket(selectedTicketForEvent as Ticket);
+              console.log(
+                "✅ Auto-selected ticket for event:",
+                eventIdParam
+              );
             }
           }
           return;
         }
       } catch (dbError) {
-        warn("⚠️ Database error, falling back to localStorage:", dbError);
+        console.warn(
+          "⚠️ Database error, falling back to localStorage:",
+          dbError
+        );
       }
 
       // Fallback to localStorage if database is empty or fails
-      log("📱 Falling back to localStorage...");
+      console.log("📱 Falling back to localStorage...");
       const registered = localStorage.getItem("registeredEvents");
       const registeredEvents = registered ? JSON.parse(registered) : [];
 
-      log("📋 Registered Events from localStorage:", registeredEvents);
+      console.log("📋 Registered Events from localStorage:", registeredEvents);
 
       const allTickets: Ticket[] = [];
 
       registeredEvents.forEach((eventId: string) => {
         const ticketData = localStorage.getItem(`ticket_${eventId}`);
-        log(`🎫 Ticket data for event ${eventId}:`, ticketData);
+        console.log(
+          `🎫 Ticket data for event ${eventId}:`,
+          ticketData
+        );
         if (ticketData) {
           allTickets.push(JSON.parse(ticketData));
         }
       });
 
-      log("✅ All tickets loaded from localStorage:", allTickets);
+      console.log("✅ All tickets loaded from localStorage:", allTickets);
 
-      // Sort by registered date (newest first) - typed properly
+      // Sort by registered date (newest first)
       const sortedAllTickets = [...allTickets].sort(
-        (a: Ticket, b: Ticket) =>
+        (a: any, b: any) =>
           new Date(b.registeredAt).getTime() -
           new Date(a.registeredAt).getTime()
-      );
+      ) as Ticket[];
 
       setTickets(sortedAllTickets);
 
       // Auto-select ticket if eventId is in query params
       if (eventIdParam) {
         const selectedTicketForEvent = sortedAllTickets.find(
-          (t: Ticket) => t.eventId === eventIdParam
+          (t: any) => t.eventId === eventIdParam
         );
         if (selectedTicketForEvent) {
-          setSelectedTicket(selectedTicketForEvent);
-          log("✅ Auto-selected ticket for event:", eventIdParam);
+          setSelectedTicket(selectedTicketForEvent as Ticket);
+          console.log(
+            "✅ Auto-selected ticket for event:",
+            eventIdParam
+          );
         }
       }
-    } catch (err) {
-      error("❌ Error loading tickets:", err);
-      setRenderError("Failed to load tickets. Please try again.");
+    } catch (error) {
+      console.error("❌ Error loading tickets:", error);
       setTickets([]);
     } finally {
       setTicketsLoading(false);
@@ -157,39 +154,23 @@ export default function TicketsPageContent() {
   };
 
   useEffect(() => {
-    let isMounted = true;
-
-    try {
-      if (!authLoading && !user) {
-        router.push("/login");
-        return;
-      }
-
-      if (user && isMounted) {
-        loadTickets();
-      }
-    } catch (err) {
-      error("Error in ticket loading effect:", err);
-      if (isMounted) {
-        setRenderError("An unexpected error occurred.");
-      }
+    if (!authLoading && !user) {
+      router.push("/login");
+      return;
     }
 
-    // Cleanup function to prevent state updates on unmounted component
-    return () => {
-      isMounted = false;
-    };
+    if (user) {
+      loadTickets();
+    }
   }, [user, authLoading, router]);
 
-  const getQRCodeUrl = (ticket: Ticket): string => {
-    if (!ticket.ticketId?.trim() || !ticket.userName?.trim() || !ticket.eventTitle?.trim()) {
-      warn("❌ Invalid ticket data for QR code generation", { ticketId: ticket.ticketId });
-      return "";
-    }
+  const getQRCodeUrl = (ticket: Ticket) => {
+    if (!ticket.ticketId || !ticket.userName || !ticket.eventTitle) return '';
     
     // Use stored QR data if available, otherwise generate it
     let ticketData = ticket.ticketQRData;
     if (!ticketData) {
+      // Fallback to generating on-the-fly if not stored
       ticketData = `TICKET|${ticket.ticketId}|${ticket.userName}|${ticket.eventTitle}`;
     }
     
@@ -198,23 +179,12 @@ export default function TicketsPageContent() {
   };
 
   const handleDownloadTicket = async (ticket: Ticket) => {
-    let tempContainer: HTMLElement | null = null;
-    
     try {
-      log("[Download] Starting ticket download for:", ticket.ticketId);
-      
-      // Validate ticket data
-      if (!ticket.ticketId) {
-        throw new Error("Invalid ticket: Missing ticket ID");
-      }
+      console.log("[Download] Starting ticket download for:", ticket.ticketId);
       
       // Fetch QR code image and convert to data URL
       const qrCodeUrl = getQRCodeUrl(ticket);
-      if (!qrCodeUrl) {
-        throw new Error("Failed to generate QR code URL");
-      }
-      
-      log("[Download] QR Code URL:", qrCodeUrl);
+      console.log("[Download] QR Code URL:", qrCodeUrl);
       
       const qrResponse = await fetch(qrCodeUrl);
       if (!qrResponse.ok) {
@@ -222,7 +192,7 @@ export default function TicketsPageContent() {
       }
       
       const qrBlob = await qrResponse.blob();
-      log("[Download] QR Blob size:", qrBlob.size);
+      console.log("[Download] QR Blob size:", qrBlob.size);
       
       const qrDataUrl = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
@@ -231,10 +201,10 @@ export default function TicketsPageContent() {
         reader.readAsDataURL(qrBlob);
       });
       
-      log("[Download] QR Data URL created, length:", qrDataUrl.length);
+      console.log("[Download] QR Data URL created, length:", qrDataUrl.length);
 
       // Create a temporary container for rendering
-      tempContainer = document.createElement("div");
+      const tempContainer = document.createElement("div");
       tempContainer.style.position = "absolute";
       tempContainer.style.left = "-9999px";
       tempContainer.style.top = "0";
@@ -242,7 +212,7 @@ export default function TicketsPageContent() {
       tempContainer.style.backgroundColor = "white";
       tempContainer.style.padding = "40px";
       tempContainer.style.fontFamily =
-        "system-ui, -apple-system, sans-serif";
+        "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
       tempContainer.style.lineHeight = "1.6";
       tempContainer.style.color = "#333";
       tempContainer.style.boxSizing = "border-box";
@@ -337,7 +307,7 @@ export default function TicketsPageContent() {
               <div style="flex-shrink: 0;">
                 <div style="font-size: 11px; color: #7c3aed; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; font-weight: 700;">📱 QR Code</div>
                 <div style="background: white; border: 1px solid #e9d5ff; border-radius: 6px; padding: 8px;">
-                  <img src="${qrDataUrl}" alt="Event ticket QR code for check-in" style="width: 140px; height: 140px; display: block;" />
+                  <img src="${qrDataUrl}" alt="QR Code" style="width: 140px; height: 140px; display: block;" />
                 </div>
               </div>
               <!-- QR Data -->
@@ -371,59 +341,60 @@ export default function TicketsPageContent() {
       `;
 
       document.body.appendChild(tempContainer);
-      log("[Download] Temp container appended");
+      console.log("[Download] Temp container appended");
 
       // Wait for images to load
       const images = tempContainer.querySelectorAll("img");
-      log("[Download] Found", images.length, "images");
+      console.log("[Download] Found", images.length, "images");
       
       await Promise.all(
         Array.from(images).map(
           (img) =>
-            new Promise<void>((resolve) => {
-              const imgElement = img as HTMLImageElement;
-              if (imgElement.complete) {
-                log("[Download] Image already loaded");
+            new Promise<void>((resolve, reject) => {
+              if ((img as HTMLImageElement).complete) {
+                console.log("[Download] Image already loaded");
                 resolve();
               } else {
-                imgElement.onload = () => {
-                  log("[Download] Image loaded");
+                img.onload = () => {
+                  console.log("[Download] Image loaded");
                   resolve();
                 };
-                imgElement.onerror = () => {
-                  warn("[Download] Image failed to load, continuing anyway");
+                img.onerror = () => {
+                  console.warn("[Download] Image failed to load, continuing anyway");
                   resolve(); // Don't fail, just continue
                 };
               }
             })
         )
       );
-      log("[Download] All images loaded");
+      console.log("[Download] All images loaded");
 
       // Convert HTML to canvas
-      log("[Download] Converting HTML to canvas...");
+      console.log("[Download] Converting HTML to canvas...");
       const canvas = await html2canvas(tempContainer, {
         scale: 2,
         logging: false,
         backgroundColor: "#ffffff",
         allowTaint: true,
         useCORS: true,
-        removeContainer: false,
+        removeContainer: true,
         ignoreElements: (element) => {
+          // Ignore script and style elements
           if (element.tagName === "SCRIPT" || element.tagName === "STYLE") {
             return true;
           }
           return false;
         },
         onclone: (clonedDocument) => {
-          const clonedImages = clonedDocument.querySelectorAll("img");
-          clonedImages.forEach((img) => {
-            (img as HTMLImageElement).style.maxWidth = "100%";
-            (img as HTMLImageElement).style.height = "auto";
+          // Ensure all images are loaded before rendering
+          const images = clonedDocument.querySelectorAll("img");
+          images.forEach((img) => {
+            img.style.maxWidth = "100%";
+            img.style.height = "auto";
           });
         },
       });
-      log("[Download] Canvas created, size:", canvas.width, "x", canvas.height);
+      console.log("[Download] Canvas created, size:", canvas.width, "x", canvas.height);
 
       // Create PDF
       const pdf = new jsPDF({
@@ -431,13 +402,13 @@ export default function TicketsPageContent() {
         unit: "mm",
         format: "a4",
       });
-      log("[Download] PDF created");
+      console.log("[Download] PDF created");
 
       const imgWidth = 210; // A4 width in mm
       const pageHeight = 297; // A4 height in mm
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       const imgData = canvas.toDataURL("image/png");
-      log("[Download] Image data created, size:", imgData.length);
+      console.log("[Download] Image data created, size:", imgData.length);
 
       // Handle multi-page PDFs
       let heightLeft = imgHeight;
@@ -446,7 +417,7 @@ export default function TicketsPageContent() {
       // Add first page
       pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
-      log("[Download] First page added, heightLeft:", heightLeft);
+      console.log("[Download] First page added, heightLeft:", heightLeft);
 
       // Add additional pages if content exceeds one page
       let pageCount = 1;
@@ -456,37 +427,33 @@ export default function TicketsPageContent() {
         pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
         heightLeft -= pageHeight;
         pageCount++;
-        log("[Download] Page", pageCount, "added, heightLeft:", heightLeft);
+        console.log("[Download] Page", pageCount, "added, heightLeft:", heightLeft);
       }
 
       const fileName = `ticket_${ticket.ticketId}.pdf`;
-      log("[Download] Saving PDF as:", fileName);
+      console.log("[Download] Saving PDF as:", fileName);
       pdf.save(fileName);
-      log("[Download] PDF saved successfully");
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : String(err);
-      error("[Download] Error generating PDF:", err);
-      error("[Download] Full error:", errorMsg);
-      setRenderError(`Failed to download ticket: ${errorMsg}`);
+      console.log("[Download] PDF saved successfully");
+
+      // Clean up
+      document.body.removeChild(tempContainer);
+      console.log("[Download] Cleanup complete");
+    } catch (error) {
+      console.error("[Download] Error generating PDF:", error);
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.error("[Download] Full error:", errorMsg);
       
       // Try to clean up even on error
       try {
         const tempContainers = document.querySelectorAll("div[style*='left: -9999px']");
-        tempContainers.forEach((el) => {
+        tempContainers.forEach(el => {
           if (el.parentNode) el.parentNode.removeChild(el);
         });
       } catch (cleanupError) {
-        warn("[Download] Cleanup error:", cleanupError);
+        console.warn("[Download] Cleanup error:", cleanupError);
       }
-    } finally {
-      // Clean up temp container
-      if (tempContainer && tempContainer.parentNode) {
-        try {
-          tempContainer.parentNode.removeChild(tempContainer);
-        } catch (cleanupError) {
-          warn("[Download] Error removing temp container:", cleanupError);
-        }
-      }
+      
+      alert(`Failed to generate PDF: ${errorMsg}. Please try again or contact support.`);
     }
   };
 
@@ -874,20 +841,6 @@ export default function TicketsPageContent() {
     }
   };
 
-  // Add keyboard event listener for modal escape key
-  useEffect(() => {
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && selectedTicket) {
-        setSelectedTicket(null);
-      }
-    };
-
-    if (selectedTicket) {
-      document.addEventListener("keydown", handleEscape);
-      return () => document.removeEventListener("keydown", handleEscape);
-    }
-  }, [selectedTicket]);
-
   const handleShareTicket = async (ticket: Ticket) => {
     const shareText = `I'm registered for ${ticket.eventTitle} on ${new Date(ticket.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })} at ${ticket.venue}. You should join too!`;
 
@@ -897,8 +850,8 @@ export default function TicketsPageContent() {
           title: "Event Ticket",
           text: shareText,
         });
-      } catch (err) {
-        log("Error sharing:", err);
+      } catch (error) {
+        console.log("Error sharing:", error);
       }
     } else {
       // Fallback: copy to clipboard
@@ -946,40 +899,6 @@ export default function TicketsPageContent() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto" />
           <p className="mt-4 text-default-500">Loading your tickets...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (renderError) {
-    return (
-      <div className="w-full min-h-screen bg-gradient-to-b from-default-50 to-default-100">
-        <div className="px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8 max-w-7xl mx-auto">
-          <Card className="border-red-200 bg-red-50">
-            <CardBody className="py-6 sm:py-8 md:py-10 text-center px-4 sm:px-6 md:px-8">
-              <div className="text-3xl sm:text-4xl md:text-5xl mb-4">⚠️</div>
-              <h2 className="text-lg sm:text-xl md:text-2xl font-semibold mb-2 text-red-600">
-                Something went wrong
-              </h2>
-              <p className="text-red-600 mb-6 text-xs sm:text-sm md:text-base">
-                {renderError}
-              </p>
-              <div className="flex gap-3 justify-center">
-                <Button
-                  color="primary"
-                  onPress={() => window.location.reload()}
-                >
-                  Retry
-                </Button>
-                <Button
-                  variant="flat"
-                  onPress={() => router.back()}
-                >
-                  Go Back
-                </Button>
-              </div>
-            </CardBody>
-          </Card>
         </div>
       </div>
     );
@@ -1250,23 +1169,12 @@ export default function TicketsPageContent() {
       {selectedTicket && (
         <div
           className="fixed inset-0 bg-black/50 z-40 flex items-center justify-center p-2 sm:p-3 md:p-4 overflow-y-auto"
-          onClick={(e) => {
-            // Close modal only if clicking on the background, not on the card
-            if (e.target === e.currentTarget) {
-              setSelectedTicket(null);
-            }
-          }}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="ticket-details-title"
+          onClick={() => setSelectedTicket(null)}
         >
           <Card className="w-full max-w-lg sm:max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto my-4 sm:my-auto">
             <CardHeader className="flex flex-col gap-1 items-start px-3 sm:px-4 md:px-6 lg:px-8 pt-4 sm:pt-6 md:pt-8 pb-0">
               <div className="flex items-center justify-between w-full gap-2">
-                <h2 
-                  id="ticket-details-title"
-                  className="text-lg sm:text-xl md:text-2xl font-bold break-words"
-                >
+                <h2 className="text-lg sm:text-xl md:text-2xl font-bold break-words">
                   Ticket Details
                 </h2>
                 <Button
@@ -1275,8 +1183,6 @@ export default function TicketsPageContent() {
                   size="sm"
                   onPress={() => setSelectedTicket(null)}
                   className="flex-shrink-0"
-                  aria-label="Close ticket details modal"
-                  title="Press Escape to close"
                 >
                   ✕
                 </Button>
