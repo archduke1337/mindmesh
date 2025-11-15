@@ -138,6 +138,16 @@ const coreTeam: TeamMember[] = [
     color: "primary",
   },
   {
+    name: "Rutuja Darade",
+    role: "Lead Social Media Operations",
+    avatar: "https://media.licdn.com/dms/image/v2/D5603AQFBOmD17JVjAQ/profile-displayphoto-scale_400_400/B56ZlnopCsKIAg-/0/1758380333072?e=1764806400&v=beta&t=53k2seWu8e9SfnhRnqjdRn5EcVQN63OPJfKSH1C6oBI",
+    linkedin: "https://www.linkedin.com/in/rutuja-darade-a53ab3311/",
+    github: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    bio: "Driving our social media presence and engagement strategies.",
+    achievements: ["Social Media Management", "Engagement Strategies"],
+    color: "primary",
+  },
+  {
     name: "Jaydeep Shirsath",
     role: "Lead Technical Operations (Cybersecurity)",
     avatar: "https://media.licdn.com/dms/image/v2/D4E03AQHwiqK1TZOheg/profile-displayphoto-scale_400_400/B4EZpsTE32GUAg-/0/1762753534343?e=1764201600&v=beta&t=qNd_FiEoKHDpB_Bp3ytjqeWra509pe5IO8eIJzIw60k",
