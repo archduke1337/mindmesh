@@ -461,6 +461,7 @@ export const eventService = {
       price: event.price,
       discountPrice: event.discountPrice,
       image: event.image,
+      ticketQRData: registration.ticketQRData,
     };
   },
 
@@ -496,6 +497,7 @@ export const eventService = {
               price: 0,
               discountPrice: null,
               image: "",
+              ticketQRData: registration.ticketQRData,
             };
           }
         })
