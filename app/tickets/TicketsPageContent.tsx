@@ -180,15 +180,28 @@ export default function TicketsPageContent() {
 
   const handleDownloadTicket = async (ticket: Ticket) => {
     try {
+      console.log("[Download] Starting ticket download for:", ticket.ticketId);
+      
       // Fetch QR code image and convert to data URL
       const qrCodeUrl = getQRCodeUrl(ticket);
+      console.log("[Download] QR Code URL:", qrCodeUrl);
+      
       const qrResponse = await fetch(qrCodeUrl);
+      if (!qrResponse.ok) {
+        throw new Error(`Failed to fetch QR code: ${qrResponse.status}`);
+      }
+      
       const qrBlob = await qrResponse.blob();
-      const qrDataUrl = await new Promise<string>((resolve) => {
+      console.log("[Download] QR Blob size:", qrBlob.size);
+      
+      const qrDataUrl = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error("Failed to read QR image"));
         reader.readAsDataURL(qrBlob);
       });
+      
+      console.log("[Download] QR Data URL created, length:", qrDataUrl.length);
 
       // Create a temporary container for rendering
       const tempContainer = document.createElement("div");
@@ -324,13 +337,16 @@ export default function TicketsPageContent() {
       `;
 
       document.body.appendChild(tempContainer);
+      console.log("[Download] Temp container appended");
 
       // Convert HTML to canvas
+      console.log("[Download] Converting HTML to canvas...");
       const canvas = await html2canvas(tempContainer, {
         scale: 2,
         logging: false,
         backgroundColor: "#ffffff",
       });
+      console.log("[Download] Canvas created, size:", canvas.width, "x", canvas.height);
 
       // Create PDF
       const pdf = new jsPDF({
@@ -338,11 +354,13 @@ export default function TicketsPageContent() {
         unit: "mm",
         format: "a4",
       });
+      console.log("[Download] PDF created");
 
       const imgWidth = 210; // A4 width in mm
       const pageHeight = 297; // A4 height in mm
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       const imgData = canvas.toDataURL("image/png");
+      console.log("[Download] Image data created, size:", imgData.length);
 
       // Handle multi-page PDFs
       let heightLeft = imgHeight;
@@ -351,22 +369,43 @@ export default function TicketsPageContent() {
       // Add first page
       pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
+      console.log("[Download] First page added, heightLeft:", heightLeft);
 
       // Add additional pages if content exceeds one page
+      let pageCount = 1;
       while (heightLeft > 0) {
         position = heightLeft - imgHeight;
         pdf.addPage();
         pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
         heightLeft -= pageHeight;
+        pageCount++;
+        console.log("[Download] Page", pageCount, "added, heightLeft:", heightLeft);
       }
 
-      pdf.save(`ticket_${ticket.ticketId}.pdf`);
+      const fileName = `ticket_${ticket.ticketId}.pdf`;
+      console.log("[Download] Saving PDF as:", fileName);
+      pdf.save(fileName);
+      console.log("[Download] PDF saved successfully");
 
       // Clean up
       document.body.removeChild(tempContainer);
+      console.log("[Download] Cleanup complete");
     } catch (error) {
-      console.error("Error generating PDF:", error);
-      alert("Failed to generate PDF. Please try again.");
+      console.error("[Download] Error generating PDF:", error);
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.error("[Download] Full error:", errorMsg);
+      
+      // Try to clean up even on error
+      try {
+        const tempContainers = document.querySelectorAll("div[style*='left: -9999px']");
+        tempContainers.forEach(el => {
+          if (el.parentNode) el.parentNode.removeChild(el);
+        });
+      } catch (cleanupError) {
+        console.warn("[Download] Cleanup error:", cleanupError);
+      }
+      
+      alert(`Failed to generate PDF: ${errorMsg}. Please try again or contact support.`);
     }
   };
 
