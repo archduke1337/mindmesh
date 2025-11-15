@@ -38,7 +38,9 @@ export async function POST(
       );
     }
 
+    console.log("[Approve] Admin verified! Approving blog:", params.id);
     const blog = await blogService.approveBlog(params.id);
+    console.log("[Approve] Blog approved successfully");
 
     return NextResponse.json({
       success: true,
@@ -46,7 +48,7 @@ export async function POST(
       message: "Blog approved successfully",
     });
   } catch (error) {
-    console.error("Error approving blog:", error);
+    console.error("[Approve] Error approving blog:", error);
     return NextResponse.json(
       {
         success: false,

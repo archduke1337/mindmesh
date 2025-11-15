@@ -6,16 +6,21 @@ import { DATABASE_ID } from "./database";
 export const BLOGS_COLLECTION_ID = "blog";
 export const BLOG_IMAGES_BUCKET_ID = "6917a084000157e9e8f9";
 
+// Cache admin databases client
+let adminDbCache: any = null;
+
 // Helper to get the appropriate database client (admin in server routes, regular client)
 const getDbClient = () => {
   // Try to use admin API if in server context (has access to API key)
   try {
-    const adminDb = createAdminDatabases();
-    if (adminDb && typeof adminDb.updateDocument === 'function') {
-      return adminDb;
+    if (!adminDbCache) {
+      adminDbCache = createAdminDatabases();
+    }
+    if (adminDbCache && typeof adminDbCache.updateDocument === 'function') {
+      return adminDbCache;
     }
   } catch (error) {
-    console.warn("Admin DB not available, falling back to regular client");
+    console.warn("[Blog] Admin DB not available, falling back to regular client");
   }
   return databases;
 };
