@@ -111,14 +111,15 @@ export default function AdminBlogsPage() {
 
       const result = await res.json();
       if (!res.ok) {
-        throw new Error(result?.error || "Failed to approve blog");
+        throw new Error(result?.error || `Failed to approve blog: ${res.statusText}`);
       }
 
       showToast("Blog approved successfully!", "success");
       await loadBlogs();
     } catch (error) {
-      console.error("Error approving blog:", error);
-      showToast("Failed to approve blog", "error");
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.error("Error approving blog:", errorMsg);
+      showToast(errorMsg || "Failed to approve blog", "error");
     } finally {
       setProcessingBlog(null);
     }
@@ -146,13 +147,16 @@ export default function AdminBlogsPage() {
         body: JSON.stringify({ reason: rejectionReason }),
       });
       const result = await res.json();
-      if (!res.ok) throw new Error(result?.error || "Failed to reject blog");
+      if (!res.ok) {
+        throw new Error(result?.error || `Failed to reject blog: ${res.statusText}`);
+      }
       showToast("Blog rejected", "success");
       await loadBlogs();
       setRejectModalOpen(false);
     } catch (error) {
-      console.error("Error rejecting blog:", error);
-      showToast("Failed to reject blog", "error");
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.error("Error rejecting blog:", errorMsg);
+      showToast(errorMsg || "Failed to reject blog", "error");
     } finally {
       setProcessingBlog(null);
     }
@@ -164,12 +168,13 @@ export default function AdminBlogsPage() {
     try {
       const res = await fetch(`/api/blog/${blogId}`, { method: "DELETE", credentials: "same-origin" });
       const result = await res.json();
-      if (!res.ok) throw new Error(result?.error || "Failed to delete blog");
+      if (!res.ok) throw new Error(result?.error || `Failed to delete blog: ${res.statusText}`);
       showToast("Blog deleted successfully!", "success");
       await loadBlogs();
     } catch (error) {
-      console.error("Error deleting blog:", error);
-      showToast("Failed to delete blog", "error");
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.error("Error deleting blog:", errorMsg);
+      showToast(errorMsg || "Failed to delete blog", "error");
     }
   };
 
@@ -182,12 +187,12 @@ export default function AdminBlogsPage() {
         body: JSON.stringify({ isFeatured: !blog.featured }),
       });
       const result = await res.json();
-      if (!res.ok) throw new Error(result?.error || "Failed to toggle featured");
+      if (!res.ok) throw new Error(result?.error || `Failed to toggle featured: ${res.statusText}`);
 
       showToast(`Blog ${!blog.featured ? "featured" : "unfeatured"} successfully!`, "success");
       await loadBlogs();
     } catch (error) {
-      const errorMsg = getErrorMessage(error);
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error("Error toggling featured:", errorMsg);
       showToast(errorMsg || "Failed to update blog", "error");
     }
